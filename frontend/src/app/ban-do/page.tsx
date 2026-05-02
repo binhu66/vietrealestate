@@ -36,11 +36,12 @@ function MapContent() {
   const focusLng = searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined;
   const focusId  = searchParams.get("id") ?? undefined;
 
-  const [tab, setTab]               = useState<ListingTab>("ban");
-  const [filters, setFilters]       = useState<MapFilters>(EMPTY_FILTERS);
-  const [modalOpen, setModalOpen]   = useState(false);
-  const [sortOpen, setSortOpen]     = useState(false);
-  const [sort, setSort]             = useState<"newest" | "price_asc" | "price_desc">("newest");
+  const [tab, setTab]                     = useState<ListingTab>("ban");
+  const [filters, setFilters]             = useState<MapFilters>(EMPTY_FILTERS);
+  const [modalOpen, setModalOpen]         = useState(false);
+  const [sortOpen, setSortOpen]           = useState(false);
+  const [sort, setSort]                   = useState<"newest" | "price_asc" | "price_desc">("newest");
+  const [polygonIds, setPolygonIds]       = useState<string[] | null>(null);
 
   // ── Active filter chips ──────────────────────────────────────────────────
   const activeChips: { label: string; clear: () => void }[] = [];
@@ -102,11 +103,14 @@ function MapContent() {
       return true;
     });
 
+    // Polygon filter (draw tool)
+    if (polygonIds !== null) list = list.filter(p => polygonIds.includes(p.id));
+
     // Sort
     if (sort === "price_asc")  list = [...list].sort((a, b) => priceInTy(a) - priceInTy(b));
     if (sort === "price_desc") list = [...list].sort((a, b) => priceInTy(b) - priceInTy(a));
     return list;
-  }, [tab, filters, sort]);
+  }, [tab, filters, sort, polygonIds]);
 
   const mapFiltered = filtered.filter(p => p.lat && p.lng);
 
@@ -137,11 +141,18 @@ function MapContent() {
           ))}
         </div>
 
-        {/* Count */}
-        <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-          <span className="font-semibold text-gray-800">{filtered.length}</span> bất động sản
-          {mapFiltered.length < filtered.length && (
-            <span className="ml-1">({mapFiltered.length} trên bản đồ)</span>
+        {/* Count + polygon indicator */}
+        <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 flex items-center gap-2">
+          <span>
+            <span className="font-semibold text-gray-800">{filtered.length}</span> bất động sản
+          </span>
+          {polygonIds !== null && (
+            <span className="flex items-center gap-1 ml-auto px-2 py-0.5 bg-red-50 text-red-700 rounded-full border border-red-200 font-medium">
+              ✏️ Trong vùng vẽ
+              <button onClick={() => setPolygonIds(null)} className="ml-1 hover:text-red-900">
+                <X className="w-3 h-3" />
+              </button>
+            </span>
           )}
         </div>
 
@@ -259,6 +270,7 @@ function MapContent() {
           focusLat={focusLat}
           focusLng={focusLng}
           focusId={focusId}
+          onPolygonFilter={setPolygonIds}
         />
       </div>
 
