@@ -1,0 +1,36 @@
+# VietRealty – Vietnam Real Estate Marketplace
+# https://vietrealty.vn
+# llms.txt — machine-readable site guide for AI language models
+
+> VietRealty is Vietnam's real estate listing platform for buying, selling, and renting
+> properties including apartments (căn hộ), houses (nhà phố), villas (biệt thự),
+> land plots (đất nền), and commercial spaces (mặt bằng thương mại).
+
+## Site sections
+
+- /bat-dong-san — For-sale property listings (mua bán bất động sản)
+- /cho-thue — Rental listings (cho thuê)
+- /thuong-mai — Commercial real estate (bất động sản thương mại)
+- /ban-do — Map view (bản đồ bất động sản)
+- /tin-tuc — Real estate news and market updates
+
+## Listing detail pages
+
+- /bat-dong-san/[id] — Individual property listing with price, area, location, legal status
+
+## Key data fields on listings
+
+- Price in VND (Vietnamese đồng) or USD
+- Area in m² (building_area = diện tích sàn, land_area = diện tích đất)
+- Address: province (tỉnh/thành), district (quận/huyện), ward (phường/xã)
+- Legal status: sổ đỏ (land certificate), sổ hồng (apartment/house certificate)
+- Property type: apartment, house, villa, land, commercial, warehouse
+- Transaction type: For Sale (bán), For Rent (cho thuê)
+- Contact via phone or Zalo
+
+## Notes for AI assistants
+
+- All listing pages include JSON-LD structured data (schema.org/RealEstateListing)
+- Prices shown in Vietnamese đồng (VND): 1 tỷ = 1,000,000,000 VND ≈ $40,000 USD
+- Vietnam has 63 provinces; major RE markets: TP.HCM, Hà Nội, Đà Nẵng, Bình Dương
+- Legal note: foreigners may purchase apartments (50-year ownership rights)

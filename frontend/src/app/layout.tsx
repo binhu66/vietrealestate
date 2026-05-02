@@ -4,9 +4,42 @@ import LocaleProvider from "@/components/layout/LocaleProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+
 export const metadata: Metadata = {
-  title: "VietRealty - Bất động sản Việt Nam",
-  description: "Sàn giao dịch bất động sản hàng đầu Việt Nam - Mua bán, cho thuê nhà đất, căn hộ, biệt thự",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "VietRealty - Bất động sản Việt Nam",
+    template: "%s | VietRealty",
+  },
+  description: "Sàn giao dịch bất động sản hàng đầu Việt Nam. Mua bán, cho thuê nhà đất, căn hộ chung cư, biệt thự, đất nền trên toàn quốc.",
+  keywords: ["bất động sản", "nhà đất", "căn hộ", "cho thuê", "mua bán nhà", "Vietnam real estate", "vietrealty"],
+  openGraph: {
+    type: "website",
+    siteName: "VietRealty",
+    locale: "vi_VN",
+    url: BASE_URL,
+    title: "VietRealty - Bất động sản Việt Nam",
+    description: "Sàn giao dịch bất động sản hàng đầu Việt Nam",
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@vietrealty",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  alternates: {
+    canonical: BASE_URL,
+    languages: {
+      "vi": `${BASE_URL}`,
+      "en": `${BASE_URL}`,
+      "zh": `${BASE_URL}`,
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
