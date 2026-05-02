@@ -3,7 +3,43 @@ import { useEffect, useRef, useState } from "react";
 import { formatPrice } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import Link from "next/link";
-import { MapPin, X, Plus, Minus, Locate, Layers, PenLine, Check } from "lucide-react";
+import { MapPin, X, Plus, Minus, Locate, Layers, Check } from "lucide-react";
+
+function DrawHandIcon({ className }: { className?: string }) {
+  // Outline pointer-hand: index finger extended up, fist + thumb below
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {/*
+        Single continuous outline of a pointing hand:
+        - index finger as a tall narrow rounded top
+        - 3 curled fingers as bumps on the right
+        - thumb bump on the left
+        - rounded palm base
+      */}
+      <path d="
+        M11 2
+        C11 2 10 2 10 3.5
+        L10 12.5
+        C9.2 12 8 12 7.5 12.8
+        C7 13.6 7.5 14.5 8.5 15
+        L9.5 15.5
+        C9 16 8.5 16.5 8.5 17.5
+        C8.5 19.5 10 21 12 21
+        L14 21
+        C16.8 21 19 18.8 19 16
+        L19 13
+        C19 12.2 18.3 11.5 17.5 11.5
+        C16.7 11.5 16 12.2 16 13
+        L16 11
+        C16 10.2 15.3 9.5 14.5 9.5
+        C13.7 9.5 13 10.2 13 11
+        L13 3.5
+        C13 2 12 2 11 2
+        Z
+      " />
+    </svg>
+  );
+}
 
 // ── Marker HTML helpers ───────────────────────────────────────────────────────
 function pricePillHtml(price: string, color: string, isVip: boolean) {
@@ -445,7 +481,7 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
                            "bg-white   text-gray-700 border-gray-100 hover:bg-gray-50 hover:shadow-lg"
           }`}
         >
-          <PenLine className="w-4 h-4" />
+          <DrawHandIcon className="w-4 h-4" />
         </button>
 
         <div className="h-px bg-gray-200 mx-1 my-0.5" />
