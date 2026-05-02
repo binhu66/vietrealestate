@@ -17,6 +17,7 @@ const en: Translations = {
     subtitle: "Thousands of homes, land plots and apartments nationwide",
     tabMua: "Buy",
     tabThue: "Rent",
+    tabThuongMai: "Commercial",
     placeholder: "Search by address, project, district...",
     btnSearch: "Search",
     allCities: "All Cities",

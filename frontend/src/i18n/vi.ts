@@ -15,6 +15,7 @@ const vi = {
     subtitle: "Hàng nghìn căn nhà, đất nền, căn hộ trên toàn quốc",
     tabMua: "Mua",
     tabThue: "Thuê",
+    tabThuongMai: "Thương mại",
     placeholder: "Tìm theo địa chỉ, dự án, quận huyện...",
     btnSearch: "Tìm kiếm",
     allCities: "Tất cả tỉnh/thành",

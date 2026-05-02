@@ -41,21 +41,48 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Category icons */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/bat-dong-san?category=${cat.id}`}
-              className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl border border-gray-200 hover:border-red-400 hover:shadow-md transition-all text-center group"
-            >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-xs font-medium text-gray-700 group-hover:text-red-600 leading-tight">
-                {locale === "en" ? cat.labelEn : locale === "zh" ? cat.labelZh : cat.label}
-              </span>
-            </Link>
-          ))}
+      {/* Category icons — residential + commercial split */}
+      <section className="max-w-7xl mx-auto px-4 py-10 space-y-6">
+        {/* Residential */}
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            {locale === "zh" ? "🏠 民用住宅" : locale === "en" ? "🏠 Residential" : "🏠 Nhà ở dân dụng"}
+          </p>
+          <div className="grid grid-cols-4 gap-3">
+            {categories.filter(c => ["can-ho-chung-cu","nha-rieng","nha-biet-thu","dat-nen"].includes(c.id)).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/bat-dong-san?category=${cat.id}`}
+                className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl border border-gray-200 hover:border-red-400 hover:shadow-md transition-all text-center group"
+              >
+                <span className="text-2xl">{cat.icon}</span>
+                <span className="text-xs font-medium text-gray-700 group-hover:text-red-600 leading-tight">
+                  {locale === "en" ? cat.labelEn : locale === "zh" ? cat.labelZh : cat.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Commercial */}
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            {locale === "zh" ? "🏢 商业地产" : locale === "en" ? "🏢 Commercial" : "🏢 Bất động sản thương mại"}
+          </p>
+          <div className="grid grid-cols-4 gap-3">
+            {categories.filter(c => ["van-phong","mat-bang","kho-xuong","khach-san"].includes(c.id)).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/thuong-mai?category=${cat.id}`}
+                className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl border border-gray-200 hover:border-amber-400 hover:shadow-md transition-all text-center group"
+              >
+                <span className="text-2xl">{cat.icon}</span>
+                <span className="text-xs font-medium text-gray-700 group-hover:text-amber-600 leading-tight">
+                  {locale === "en" ? cat.labelEn : locale === "zh" ? cat.labelZh : cat.label}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

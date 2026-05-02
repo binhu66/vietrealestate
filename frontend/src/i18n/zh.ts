@@ -17,6 +17,7 @@ const zh: Translations = {
     subtitle: "全国数千套公寓、别墅、土地任您选择",
     tabMua: "购买",
     tabThue: "租赁",
+    tabThuongMai: "商业地产",
     placeholder: "按地址、项目、区域搜索...",
     btnSearch: "搜索",
     allCities: "所有城市",
