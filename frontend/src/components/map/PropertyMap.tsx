@@ -6,37 +6,22 @@ import Link from "next/link";
 import { MapPin, X, Plus, Minus, Locate, Layers, Check } from "lucide-react";
 
 function DrawHandIcon({ className }: { className?: string }) {
-  // Outline pointer-hand: index finger extended up, fist + thumb below
+  // 仿 iconfont "滑动(1)": 食指伸出的手 + 左上弧形箭头
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      {/*
-        Single continuous outline of a pointing hand:
-        - index finger as a tall narrow rounded top
-        - 3 curled fingers as bumps on the right
-        - thumb bump on the left
-        - rounded palm base
-      */}
-      <path d="
-        M11 2
-        C11 2 10 2 10 3.5
-        L10 12.5
-        C9.2 12 8 12 7.5 12.8
-        C7 13.6 7.5 14.5 8.5 15
-        L9.5 15.5
-        C9 16 8.5 16.5 8.5 17.5
-        C8.5 19.5 10 21 12 21
-        L14 21
-        C16.8 21 19 18.8 19 16
-        L19 13
-        C19 12.2 18.3 11.5 17.5 11.5
-        C16.7 11.5 16 12.2 16 13
-        L16 11
-        C16 10.2 15.3 9.5 14.5 9.5
-        C13.7 9.5 13 10.2 13 11
-        L13 3.5
-        C13 2 12 2 11 2
-        Z
-      " />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      {/* curved arrow top-left (swipe/draw gesture) */}
+      <path d="M5.5 8.5 C5.5 5.5 8 3.5 11 3.5" />
+      <polyline points="4,6.5 5.5,8.5 7.5,7.2" />
+      {/* index finger */}
+      <path d="M11 3.5 C11 2.7 11.7 2 12.5 2 C13.3 2 14 2.7 14 3.5 L14 12" />
+      {/* middle finger */}
+      <path d="M14 6 C14 5.2 14.7 4.5 15.5 4.5 C16.3 4.5 17 5.2 17 6 L17 12.5" />
+      {/* ring finger */}
+      <path d="M17 8 C17 7.2 17.7 6.5 18.5 6.5 C19.3 6.5 20 7.2 20 8 L20 13" />
+      {/* thumb */}
+      <path d="M11 11 C11 10 10 9.2 9 9.6 C8.2 9.9 7.5 10.8 7.5 11.8 L7.5 13" />
+      {/* palm */}
+      <path d="M7.5 13.5 C7.5 12.7 8.2 12 9 12 L11 12 L11 15 C11 17.5 13 19.5 15.5 19.5 C18 19.5 20 17.5 20 15 L20 13" />
     </svg>
   );
 }
