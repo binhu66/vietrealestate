@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { formatPrice } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import Link from "next/link";
-import { MapPin, X, Plus, Minus, Locate, Layers, Check, Pointer } from "lucide-react";
+import { MapPin, X, Plus, Minus, Locate, Layers, Check } from "lucide-react";
+import { HandTap } from "@phosphor-icons/react";
 
 // ── Marker HTML helpers ───────────────────────────────────────────────────────
 function pricePillHtml(price: string, color: string, isVip: boolean) {
@@ -445,7 +446,7 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
                            "bg-white   text-gray-700 border-gray-100 hover:bg-gray-50 hover:shadow-lg"
           }`}
         >
-          <Pointer className="w-4 h-4" />
+          <HandTap className="w-4 h-4" />
         </button>
 
         <div className="h-px bg-gray-200 mx-1 my-0.5" />
