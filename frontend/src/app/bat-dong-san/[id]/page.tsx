@@ -1,0 +1,266 @@
+"use client";
+import { use } from "react";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
+import {
+  MapPin, BedDouble, Bath, Maximize2, Eye, Calendar,
+  Phone, Share2, Heart, ChevronLeft, ChevronRight,
+  Shield, Home, Compass, FileText
+} from "lucide-react";
+import { properties, formatPrice, categories } from "@/lib/data";
+import PropertyCard from "@/components/property/PropertyCard";
+import { useLocale } from "@/lib/locale";
+import { getT } from "@/i18n";
+
+export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const { locale } = useLocale();
+  const t = getT(locale);
+  const property = properties.find((p) => p.id === id);
+
+  const [imgIdx, setImgIdx] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+
+  if (!property) notFound();
+
+  const title =
+    locale === "en" && property.titleEn
+      ? property.titleEn
+      : locale === "zh" && property.titleZh
+      ? property.titleZh
+      : property.title;
+
+  const similar = properties
+    .filter((p) => p.id !== property.id && p.category === property.category)
+    .slice(0, 4);
+
+  const categoryLabel = categories.find((c) => c.id === property.category);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Breadcrumb */}
+      <nav className="text-sm text-gray-500 mb-4 flex items-center gap-2">
+        <Link href="/" className="hover:text-red-600">Trang chủ</Link>
+        <span>/</span>
+        <Link href="/bat-dong-san" className="hover:text-red-600">Bất động sản</Link>
+        <span>/</span>
+        <span className="text-gray-800 truncate max-w-xs">{title}</span>
+      </nav>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Images + Details */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Image gallery */}
+          <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
+            <div className="relative aspect-video bg-gray-100">
+              <img
+                src={property.images[imgIdx]}
+                alt={title}
+                className="w-full h-full object-cover"
+              />
+              {property.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setImgIdx((i) => Math.max(0, i - 1))}
+                    disabled={imgIdx === 0}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 text-white rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-black/70"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setImgIdx((i) => Math.min(property.images.length - 1, i + 1))}
+                    disabled={imgIdx === property.images.length - 1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/50 text-white rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-black/70"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                    {imgIdx + 1}/{property.images.length}
+                  </span>
+                </>
+              )}
+              {property.isVip && (
+                <span className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
+                  ⭐ VIP
+                </span>
+              )}
+            </div>
+
+            {/* Thumbnails */}
+            {property.images.length > 1 && (
+              <div className="flex gap-2 p-3 bg-gray-50">
+                {property.images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgIdx(i)}
+                    className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition-colors ${i === imgIdx ? "border-red-600" : "border-transparent"}`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Title & price */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${property.type === "ban" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
+                    {property.type === "ban" ? t.property.forSale : t.property.forRent}
+                  </span>
+                  {categoryLabel && (
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      {categoryLabel.icon} {locale === "en" ? categoryLabel.labelEn : locale === "zh" ? categoryLabel.labelZh : categoryLabel.label}
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-xl font-bold text-gray-900 leading-tight">{title}</h1>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => setSaved(!saved)}
+                  className={`p-2 rounded-lg border transition-colors ${saved ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
+                >
+                  <Heart className={`w-5 h-5 ${saved ? "fill-red-500" : ""}`} />
+                </button>
+                <button className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">
+                  <Share2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center gap-2 text-gray-500 text-sm">
+              <MapPin className="w-4 h-4 text-red-500" />
+              <span>{property.address}, {property.district}, {property.city}</span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div>
+                <span className="text-3xl font-black text-red-600">
+                  {formatPrice(property.price, property.priceUnit)}
+                </span>
+                {property.area > 0 && (
+                  <span className="text-gray-500 text-sm ml-2">
+                    · {(property.price / property.area).toFixed(0)} tr/m²
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Key info */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-bold text-gray-800 mb-4">Thông tin bất động sản</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { icon: <Maximize2 className="w-4 h-4" />, label: "Diện tích", value: `${property.area} m²` },
+                property.bedrooms && { icon: <BedDouble className="w-4 h-4" />, label: "Phòng ngủ", value: `${property.bedrooms} phòng` },
+                property.bathrooms && { icon: <Bath className="w-4 h-4" />, label: "Phòng tắm", value: `${property.bathrooms} phòng` },
+                property.floor && { icon: <Home className="w-4 h-4" />, label: "Số tầng", value: `Tầng ${property.floor}` },
+                property.direction && { icon: <Compass className="w-4 h-4" />, label: "Hướng", value: property.direction },
+                property.legalStatus && { icon: <FileText className="w-4 h-4" />, label: "Pháp lý", value: property.legalStatus },
+              ].filter(Boolean).map((item: any) => (
+                <div key={item.label} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-red-500">{item.icon}</div>
+                  <div>
+                    <div className="text-xs text-gray-500">{item.label}</div>
+                    <div className="font-semibold text-gray-800 text-sm">{item.value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-bold text-gray-800 mb-3">Mô tả chi tiết</h2>
+            <p className="text-gray-700 leading-relaxed text-sm">{property.description}</p>
+          </div>
+
+          {/* Address detail */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-red-500" /> Địa chỉ
+            </h2>
+            <div className="text-sm text-gray-700 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="text-gray-500">Địa chỉ:</span> <span className="font-medium">{property.address}</span></div>
+                <div><span className="text-gray-500">Quận/Huyện:</span> <span className="font-medium">{property.district}</span></div>
+                <div><span className="text-gray-500">Tỉnh/TP:</span> <span className="font-medium">{property.city}</span></div>
+                {property.lat && property.lng && (
+                  <div><span className="text-gray-500">Tọa độ GPS:</span> <span className="font-mono text-xs">{property.lat?.toFixed(4)}, {property.lng?.toFixed(4)}</span></div>
+                )}
+              </div>
+              {property.lat && property.lng && (
+                <Link
+                  href={`/ban-do?lat=${property.lat}&lng=${property.lng}&id=${property.id}`}
+                  className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  🗺️ Xem trên bản đồ
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Contact card */}
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                {property.contactName[0]}
+              </div>
+              <div>
+                <div className="font-semibold text-gray-800">{property.contactName}</div>
+                <div className="text-xs text-green-600 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full inline-block" /> Đang online
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowPhone(true)}
+              className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2 mb-3"
+            >
+              <Phone className="w-5 h-5" />
+              {showPhone ? property.contactPhone : t.property.showPhone}
+            </button>
+
+            <button className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mb-3">
+              💬 Nhắn tin Zalo
+            </button>
+
+            <div className="text-xs text-gray-500 space-y-2 border-t border-gray-100 pt-3">
+              <div className="flex items-center gap-2">
+                <Eye className="w-3.5 h-3.5" />
+                <span>{property.views?.toLocaleString()} lượt xem</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Đăng ngày {property.postedAt}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-green-500" />
+                <span className="text-green-600">Đã xác minh thông tin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Similar listings */}
+      {similar.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">🏡 {t.property.similar}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {similar.map((p) => <PropertyCard key={p.id} property={p} />)}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
