@@ -1,78 +1,168 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Home, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Building2, Home, ChevronRight, CheckCircle2, MapPin, Loader2 } from "lucide-react";
 import { cities, categories } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 
 const RESIDENTIAL_IDS = ["can-ho-chung-cu", "nha-rieng", "nha-biet-thu", "dat-nen"];
-const COMMERCIAL_IDS = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
+const COMMERCIAL_IDS  = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
+
+// Map frontend category slugs → DB property_type enum
+const CATEGORY_TO_TYPE: Record<string, string> = {
+  "can-ho-chung-cu": "apartment",
+  "nha-rieng":       "house",
+  "nha-biet-thu":    "villa",
+  "dat-nen":         "land",
+  "van-phong":       "office",
+  "mat-bang":        "commercial",
+  "kho-xuong":       "warehouse",
+  "khach-san":       "other",
+};
+
+// Convert display price (tỷ/triệu) → VND for DB storage
+function toVND(price: string, unit: string): number {
+  const n = parseFloat(price) || 0;
+  if (unit === "ty")          return Math.round(n * 1_000_000_000);
+  if (unit === "trieu")       return Math.round(n * 1_000_000);
+  if (unit === "trieu/thang") return Math.round(n * 1_000_000);
+  if (unit === "nghin/thang") return Math.round(n * 1_000);
+  return Math.round(n);
+}
 
 type Step = "type" | "form" | "done";
 
 export default function DangTinPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("type");
+  const router   = useRouter();
+  const [step,    setStep]    = useState<Step>("type");
   const [segment, setSegment] = useState<"residential" | "commercial">("residential");
   const [submitting, setSubmitting] = useState(false);
+  const [error,   setError]   = useState("");
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    listingType: "ban",
-    category: "",
-    title: "",
-    price: "",
-    priceUnit: "ty",
-    area: "",
-    bedrooms: "",
-    bathrooms: "",
-    address: "",
-    district: "",
-    city: "",
-    description: "",
-    contactName: "",
+    listingType:  "ban",
+    category:     "",
+    title:        "",
+    price:        "",
+    priceUnit:    "ty",
+    area:         "",
+    bedrooms:     "",
+    bathrooms:    "",
+    address:      "",
+    district:     "",
+    city:         "",
+    description:  "",
+    contactName:  "",
     contactPhone: "",
   });
 
   function set(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm(prev => ({ ...prev, [field]: value }));
   }
 
   function handleSegment(s: "residential" | "commercial") {
     setSegment(s);
-    setForm((prev) => ({ ...prev, category: "", listingType: "ban" }));
+    setForm(prev => ({ ...prev, category: "", listingType: "ban" }));
     setStep("form");
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate submit — replace with real API call later
-    await new Promise((r) => setTimeout(r, 800));
-    setSubmitting(false);
-    setStep("done");
+    setError("");
+
+    try {
+      const fullAddress = [form.address, form.district, form.city].filter(Boolean).join(", ");
+
+      // ── 1. Geocode address ────────────────────────────────────────────────
+      let lat: number | null = null;
+      let lng: number | null = null;
+      if (fullAddress.length > 5) {
+        try {
+          const geoRes = await fetch(
+            `/api/geocode?address=${encodeURIComponent(fullAddress)}`
+          );
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            if (geoData.lat) { lat = geoData.lat; lng = geoData.lng; }
+          }
+        } catch {
+          // geocoding optional — proceed without coordinates
+        }
+      }
+
+      // ── 2. Insert into Supabase ───────────────────────────────────────────
+      const { data, error: dbError } = await supabase
+        .from("listings")
+        .insert({
+          transaction_type:   form.listingType === "ban" ? "For Sale" : "For Rent",
+          property_type:      CATEGORY_TO_TYPE[form.category] ?? "other",
+          category:           form.category,
+          title:              form.title,
+          list_price:         toVND(form.price, form.priceUnit),
+          price_unit:         "vnd",
+          building_area_total: parseFloat(form.area) || null,
+          bedrooms_total:     form.bedrooms ? parseInt(form.bedrooms) : null,
+          bathrooms_total:    form.bathrooms ? parseInt(form.bathrooms) : null,
+          unparsed_address:   fullAddress || null,
+          so_nha:             form.address || null,
+          quan_huyen:         form.district || null,
+          tinh_thanh:         form.city || "TP. Hồ Chí Minh",
+          public_remarks:     form.description || null,
+          contact_name:       form.contactName,
+          contact_phone:      form.contactPhone,
+          lat,
+          lng,
+          standard_status:    "Active",
+          posted_by:          null,
+        })
+        .select("id")
+        .single();
+
+      if (dbError) throw new Error(dbError.message);
+
+      setSavedId(data?.id ?? null);
+      setStep("done");
+    } catch (err: any) {
+      setError(err.message ?? "Có lỗi xảy ra, vui lòng thử lại.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  const categoryList = categories.filter((c) =>
+  const categoryList = categories.filter(c =>
     segment === "commercial" ? COMMERCIAL_IDS.includes(c.id) : RESIDENTIAL_IDS.includes(c.id)
   );
-
   const isCommercial = segment === "commercial";
 
+  // ── Done screen ─────────────────────────────────────────────────────────
   if (step === "done") {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-black text-gray-900 mb-2">Đăng tin thành công!</h2>
-          <p className="text-gray-500 mb-6">Tin đăng của bạn đang chờ xét duyệt. Chúng tôi sẽ thông báo qua điện thoại trong vòng 24 giờ.</p>
+          <p className="text-gray-500 mb-2">Tin đăng đã được lưu và hiển thị trên sàn.</p>
+          {savedId && (
+            <p className="text-xs text-gray-400 mb-6 font-mono">ID: {savedId}</p>
+          )}
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => { setStep("type"); setForm({ listingType:"ban", category:"", title:"", price:"", priceUnit:"ty", area:"", bedrooms:"", bathrooms:"", address:"", district:"", city:"", description:"", contactName:"", contactPhone:"" }); }}
+              onClick={() => {
+                setStep("type");
+                setSavedId(null);
+                setForm({ listingType:"ban", category:"", title:"", price:"", priceUnit:"ty", area:"", bedrooms:"", bathrooms:"", address:"", district:"", city:"", description:"", contactName:"", contactPhone:"" });
+              }}
               className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Đăng tin mới
             </button>
-            <button onClick={() => router.push("/")} className="px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors">
-              Về trang chủ
+            <button
+              onClick={() => router.push("/bat-dong-san")}
+              className="px-5 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
+            >
+              Xem danh sách →
             </button>
           </div>
         </div>
@@ -80,6 +170,7 @@ export default function DangTinPage() {
     );
   }
 
+  // ── Type picker ─────────────────────────────────────────────────────────
   if (step === "type") {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12">
@@ -120,7 +211,7 @@ export default function DangTinPage() {
     );
   }
 
-  // Form step
+  // ── Form ─────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Header */}
@@ -140,14 +231,9 @@ export default function DangTinPage() {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Loại tin đăng</label>
           <div className="flex gap-2">
-            {[
-              { value: "ban", label: "Bán" },
-              { value: "thue", label: "Cho thuê" },
-            ].map(({ value, label }) => (
+            {[{ value: "ban", label: "Bán" }, { value: "thue", label: "Cho thuê" }].map(({ value, label }) => (
               <button
-                key={value}
-                type="button"
-                onClick={() => set("listingType", value)}
+                key={value} type="button" onClick={() => set("listingType", value)}
                 className={`px-5 py-2 rounded-lg font-semibold text-sm transition-colors ${form.listingType === value ? (isCommercial ? "bg-amber-600 text-white" : "bg-red-600 text-white") : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
               >
                 {label}
@@ -160,11 +246,9 @@ export default function DangTinPage() {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Loại bất động sản <span className="text-red-500">*</span></label>
           <div className="grid grid-cols-2 gap-2">
-            {categoryList.map((c) => (
+            {categoryList.map(c => (
               <button
-                key={c.id}
-                type="button"
-                onClick={() => set("category", c.id)}
+                key={c.id} type="button" onClick={() => set("category", c.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${form.category === c.id ? (isCommercial ? "border-amber-500 bg-amber-50 text-amber-700" : "border-red-500 bg-red-50 text-red-700") : "border-gray-200 text-gray-700 hover:border-gray-300"}`}
               >
                 <span>{c.icon}</span>{c.label}
@@ -177,10 +261,8 @@ export default function DangTinPage() {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Tiêu đề tin đăng <span className="text-red-500">*</span></label>
           <input
-            required
-            type="text"
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
+            required type="text" value={form.title}
+            onChange={e => set("title", e.target.value)}
             placeholder="VD: Bán căn hộ 2PN view sông tại Quận 2"
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           />
@@ -191,17 +273,13 @@ export default function DangTinPage() {
           <label className="block text-sm font-semibold text-gray-700 mb-2">Giá <span className="text-red-500">*</span></label>
           <div className="flex gap-2">
             <input
-              required
-              type="number"
-              min="0"
-              value={form.price}
-              onChange={(e) => set("price", e.target.value)}
+              required type="number" min="0" value={form.price}
+              onChange={e => set("price", e.target.value)}
               placeholder="0"
               className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
             <select
-              value={form.priceUnit}
-              onChange={(e) => set("priceUnit", e.target.value)}
+              value={form.priceUnit} onChange={e => set("priceUnit", e.target.value)}
               className="px-3 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
             >
               <option value="ty">Tỷ</option>
@@ -216,33 +294,30 @@ export default function DangTinPage() {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Diện tích (m²) <span className="text-red-500">*</span></label>
           <input
-            required
-            type="number"
-            min="0"
-            value={form.area}
-            onChange={(e) => set("area", e.target.value)}
+            required type="number" min="0" value={form.area}
+            onChange={e => set("area", e.target.value)}
             placeholder="0"
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
 
-        {/* Bedrooms + bathrooms (residential only) */}
+        {/* Bedrooms + bathrooms */}
         {!isCommercial && (
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Số phòng ngủ</label>
-              <select value={form.bedrooms} onChange={(e) => set("bedrooms", e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+              <select value={form.bedrooms} onChange={e => set("bedrooms", e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
                 <option value="">--</option>
                 {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
-                <option value="7+">7+</option>
+                <option value="7">7+</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Số phòng tắm</label>
-              <select value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+              <select value={form.bathrooms} onChange={e => set("bathrooms", e.target.value)} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
                 <option value="">--</option>
                 {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-                <option value="6+">6+</option>
+                <option value="6">6+</option>
               </select>
             </div>
           </div>
@@ -250,41 +325,45 @@ export default function DangTinPage() {
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              Địa chỉ <span className="text-red-500">*</span>
+            </span>
+          </label>
           <input
-            required
-            type="text"
-            value={form.address}
-            onChange={(e) => set("address", e.target.value)}
+            required type="text" value={form.address}
+            onChange={e => set("address", e.target.value)}
             placeholder="Số nhà, tên đường..."
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 mb-2"
           />
           <div className="grid grid-cols-2 gap-2">
             <input
-              type="text"
-              value={form.district}
-              onChange={(e) => set("district", e.target.value)}
+              type="text" value={form.district}
+              onChange={e => set("district", e.target.value)}
               placeholder="Quận/Huyện"
               className="px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
             <select
-              value={form.city}
-              onChange={(e) => set("city", e.target.value)}
+              value={form.city} onChange={e => set("city", e.target.value)}
               className="px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
             >
               <option value="">Tỉnh/Thành phố</option>
-              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+              {cities.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+          <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+            <MapPin className="w-3 h-3" />
+            Địa chỉ sẽ được tự động định vị trên bản đồ
+          </p>
         </div>
 
         {/* Description */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Mô tả chi tiết</label>
           <textarea
-            rows={4}
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
+            rows={4} value={form.description}
+            onChange={e => set("description", e.target.value)}
             placeholder="Mô tả về vị trí, tiện ích, tình trạng pháp lý..."
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
           />
@@ -294,32 +373,36 @@ export default function DangTinPage() {
         <div className="bg-gray-50 rounded-xl p-4 space-y-3">
           <p className="text-sm font-semibold text-gray-700">Thông tin liên hệ</p>
           <input
-            required
-            type="text"
-            value={form.contactName}
-            onChange={(e) => set("contactName", e.target.value)}
+            required type="text" value={form.contactName}
+            onChange={e => set("contactName", e.target.value)}
             placeholder="Họ và tên *"
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
           />
           <input
-            required
-            type="tel"
-            value={form.contactPhone}
-            onChange={(e) => set("contactPhone", e.target.value)}
+            required type="tel" value={form.contactPhone}
+            onChange={e => set("contactPhone", e.target.value)}
             placeholder="Số điện thoại *"
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
           />
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
           disabled={submitting || !form.title || !form.price || !form.area || !form.address || !form.contactName || !form.contactPhone || !form.category}
-          className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all ${isCommercial ? "bg-amber-600 hover:bg-amber-700" : "bg-red-600 hover:bg-red-700"} disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`w-full py-4 rounded-xl font-bold text-white text-base transition-all flex items-center justify-center gap-2 ${isCommercial ? "bg-amber-600 hover:bg-amber-700" : "bg-red-600 hover:bg-red-700"} disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {submitting ? "Đang gửi..." : "Đăng tin ngay"}
+          {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+          {submitting ? "Đang đăng tin..." : "Đăng tin ngay"}
         </button>
-        <p className="text-xs text-center text-gray-400">Tin đăng sẽ được xét duyệt trong vòng 24 giờ</p>
+        <p className="text-xs text-center text-gray-400">Tin đăng sẽ được hiển thị ngay sau khi đăng</p>
       </form>
     </div>
   );

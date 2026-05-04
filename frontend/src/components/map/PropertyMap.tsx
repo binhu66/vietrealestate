@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import { formatPrice } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import Link from "next/link";
@@ -59,45 +60,56 @@ function clusterHtml(count: number) {
 // ── Tile layer definitions ────────────────────────────────────────────────────
 type MapStyle = "street" | "satellite" | "light" | "dark" | "terrain";
 
-const MAP_STYLES: {
+type StyleDef = {
   id: MapStyle; label: string; emoji: string;
-  url: string; attrib: string; subdomains?: string;
+  url: (token: string) => string;
+  attrib: string; tileSize?: number; zoomOffset?: number;
   preview: string; bgClass: string;
-}[] = [
+};
+
+const MAP_STYLES: StyleDef[] = [
   {
     id: "street", label: "Đường phố", emoji: "🗺️",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attrib: "© OpenStreetMap contributors",
-    preview: "https://tile.openstreetmap.org/6/50/30.png",
+    url: t => t
+      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${t}`
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attrib: '© <a href="https://www.mapbox.com/">Mapbox</a> © <a href="https://www.openstreetmap.org/">OSM</a>',
+    preview: "https://a.basemaps.cartocdn.com/light_all/6/50/30.png",
     bgClass: "bg-orange-50",
   },
   {
     id: "satellite", label: "Vệ tinh", emoji: "🛰️",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attrib: "© Esri, Maxar, GeoEye",
+    url: t => t
+      ? `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/tiles/{z}/{x}/{y}?access_token=${t}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attrib: '© <a href="https://www.mapbox.com/">Mapbox</a>',
     preview: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/6/30/50",
     bgClass: "bg-gray-800",
   },
   {
     id: "light", label: "Sáng", emoji: "☀️",
-    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    attrib: "© CartoDB",
-    subdomains: "abcd",
+    url: t => t
+      ? `https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${t}`
+      : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+    attrib: '© <a href="https://www.mapbox.com/">Mapbox</a>',
     preview: "https://a.basemaps.cartocdn.com/light_all/6/50/30.png",
     bgClass: "bg-gray-50",
   },
   {
     id: "dark", label: "Tối", emoji: "🌙",
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attrib: "© CartoDB",
-    subdomains: "abcd",
+    url: t => t
+      ? `https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=${t}`
+      : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+    attrib: '© <a href="https://www.mapbox.com/">Mapbox</a>',
     preview: "https://a.basemaps.cartocdn.com/dark_all/6/50/30.png",
     bgClass: "bg-gray-900",
   },
   {
     id: "terrain", label: "Địa hình", emoji: "⛰️",
-    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-    attrib: "© OpenTopoMap",
+    url: t => t
+      ? `https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=${t}`
+      : "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    attrib: '© <a href="https://www.mapbox.com/">Mapbox</a>',
     preview: "https://a.tile.opentopomap.org/6/50/30.png",
     bgClass: "bg-green-100",
   },
@@ -137,9 +149,12 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
   const drawDotsRef      = useRef<any[]>([]);
   const verticesRef      = useRef<[number, number][]>([]);
   const isDrawingRef     = useRef(false);
-  const drawHandlerRef   = useRef<((e: any) => void) | null>(null);
-  const mouseMoveHRef    = useRef<((e: any) => void) | null>(null);
+  const drawHandlerRef   = useRef<((e: MouseEvent) => void) | null>(null);
+  const dblClickHRef     = useRef<((e: MouseEvent) => void) | null>(null);
+  const mouseMoveHRef    = useRef<((e: MouseEvent) => void) | null>(null);
   const previewLineRef   = useRef<any>(null);
+
+  const mapboxTokenRef  = useRef("");   // mirrors mapboxToken for init-effect closure
 
   const [selected,      setSelected]      = useState<Property | null>(null);
   const [mapStyle,      setMapStyle]      = useState<MapStyle>("street");
@@ -147,44 +162,84 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
   const [drawing,       setDrawing]       = useState(false);
   const [polygonActive, setPolygonActive] = useState(false);
   const [locating,      setLocating]      = useState(false);
+  const [mapboxToken,   setMapboxToken]   = useState("");
+  const [mapReady,      setMapReady]      = useState(false);
 
-  // ── Init map ──────────────────────────────────────────────────────────────
+  // ── Fetch Mapbox temporary token ─────────────────────────────────────────
   useEffect(() => {
-    if (!mapRef.current || mapInstance.current) return;
-    import("leaflet").then(async (L) => {
-      LeafletRef.current = L;
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
+    // Try local Next.js API route first (works without Supabase JWT auth),
+    // then fall back to Supabase Edge Function, then fall back to OSM tiles.
+    fetch("/api/mapbox-token")
+      .then(r => r.json())
+      .then(d => {
+        if (d.token) { mapboxTokenRef.current = d.token; setMapboxToken(d.token); return; }
+        // Local route failed (env vars not set) — try Edge Function
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        );
+        return supabase.functions.invoke("mapbox-token").then(({ data }) => {
+          if (data?.token) { mapboxTokenRef.current = data.token; setMapboxToken(data.token); }
+        });
+      })
+      .catch(() => {/* fall back to OSM tiles */});
+  }, []);
 
-      const map = L.map(mapRef.current!, {
-        center: [focusLat ?? 10.7769, focusLng ?? 106.7009],
-        zoom: focusLat ? 15 : 11,
-        zoomControl: false,
-        doubleClickZoom: false,
+  // ── Init map (CDN-based to avoid frozen ESM issues with plugins) ──────────
+  useEffect(() => {
+    if (!mapRef.current) return;
+    let cancelled = false;
+
+    function loadScript(src: string): Promise<void> {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement("script");
+        s.src = src; s.async = false;
+        s.onload = () => resolve(); s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js")
+      .then(() => loadScript("https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"))
+      .then(() => {
+        const L = (window as any).L;
+        if (cancelled || !L || !mapRef.current || (mapRef.current as any)._leaflet_id) return;
+        LeafletRef.current = L;
+        delete L.Icon.Default.prototype._getIconUrl;
+
+        const map = L.map(mapRef.current, {
+          center: [focusLat ?? 10.7769, focusLng ?? 106.7009],
+          zoom: focusLat ? 15 : 11,
+          zoomControl: false,
+          doubleClickZoom: false,
+        });
+
+        const style = MAP_STYLES.find(s => s.id === "street")!;
+        // Use ref (not state closure) so we get the latest token even if it arrived during CDN loading
+        tileRef.current = L.tileLayer(style.url(mapboxTokenRef.current), { attribution: style.attrib, maxZoom: 19 }).addTo(map);
+        drawLayerRef.current = L.layerGroup().addTo(map);
+
+        setMapReady(true);
+        clusterRef.current = L.markerClusterGroup({
+          maxClusterRadius: 60,
+          showCoverageOnHover: false,
+          spiderfyOnMaxZoom: true,
+          animate: true,
+          iconCreateFunction: (cluster: any) => L.divIcon({
+            html: clusterHtml(cluster.getChildCount()),
+            className: "",
+            iconSize: undefined,
+            iconAnchor: [0, 0],
+          }),
+        });
+        map.addLayer(clusterRef.current);
+        mapInstance.current = map;
+        (window as any).__leafletMap = map;
       });
 
-      const style = MAP_STYLES.find(s => s.id === "street")!;
-      tileRef.current = L.tileLayer(style.url, { attribution: style.attrib, maxZoom: 19 }).addTo(map);
-      drawLayerRef.current = L.layerGroup().addTo(map);
-
-      // Load markercluster plugin
-      await import("leaflet.markercluster");
-      clusterRef.current = (L as any).markerClusterGroup({
-        maxClusterRadius: 60,
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
-        animate: true,
-        iconCreateFunction: (cluster: any) => L.divIcon({
-          html: clusterHtml(cluster.getChildCount()),
-          className: "",
-          iconSize: undefined as any,
-          iconAnchor: [0, 0],
-        }),
-      });
-      map.addLayer(clusterRef.current);
-
-      mapInstance.current = map;
-    });
     return () => {
+      cancelled = true;
       mapInstance.current?.remove();
       mapInstance.current = null;
       tileRef.current = null;
@@ -225,18 +280,17 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
     }
   }
 
-  // ── Change tile style ─────────────────────────────────────────────────────
+  // ── Change tile style (re-runs when token arrives or style changes) ────────
   useEffect(() => {
     const L = LeafletRef.current, map = mapInstance.current;
     if (!L || !map || !tileRef.current) return;
     const s = MAP_STYLES.find(x => x.id === mapStyle)!;
     tileRef.current.remove();
-    tileRef.current = L.tileLayer(s.url, {
+    tileRef.current = L.tileLayer(s.url(mapboxToken), {
       attribution: s.attrib,
       maxZoom: 19,
-      ...(s.subdomains ? { subdomains: s.subdomains } : {}),
     }).addTo(map);
-  }, [mapStyle]);
+  }, [mapStyle, mapboxToken, mapReady]);
 
   // ── Zoom / Locate ─────────────────────────────────────────────────────────
   function handleZoomIn()  { mapInstance.current?.zoomIn(); }
@@ -261,19 +315,21 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
     isDrawingRef.current = true;
     setDrawing(true);
     setPolygonActive(false);
-    map.getContainer().style.cursor = "crosshair";
 
-    const clickHandler = (e: any) => {
-      const pt: [number, number] = [e.latlng.lat, e.latlng.lng];
+    const container = map.getContainer();
+    container.style.cursor = "crosshair";
+    // Disable Leaflet drag so map doesn't pan while drawing
+    map.dragging.disable();
+
+    const addVertex = (latlng: { lat: number; lng: number }) => {
+      const pt: [number, number] = [latlng.lat, latlng.lng];
       verticesRef.current = [...verticesRef.current, pt];
       const verts = verticesRef.current;
 
-      // Dot
       const dot = L.circleMarker(pt, { radius: 5, color: "#ef4444", fillColor: "#fff", fillOpacity: 1, weight: 2 });
       drawLayerRef.current.addLayer(dot);
       drawDotsRef.current.push(dot);
 
-      // Polyline
       drawPolyRef.current?.remove();
       if (verts.length >= 2) {
         drawPolyRef.current = L.polyline(verts, { color: "#ef4444", weight: 2, dashArray: "6 4" });
@@ -281,23 +337,48 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
       }
     };
 
-    const mouseMoveHandler = (e: any) => {
-      if (verticesRef.current.length === 0) return;
+    // Use direct DOM events — bypasses Leaflet's drag-vs-click delay for physical clicks.
+    // Handle double-click within the click handler via timestamp to avoid extra vertices.
+    let lastClickMs = 0;
+
+    const domClickHandler = (e: MouseEvent) => {
+      if (!isDrawingRef.current) return;
+      e.stopPropagation();
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastClickMs < 350) {
+        // Double-click: finish without adding another vertex
+        finishDrawing();
+        return;
+      }
+      lastClickMs = now;
+      addVertex(map.mouseEventToLatLng(e));
+    };
+
+    const domDblClickHandler = (e: MouseEvent) => {
+      // Swallow the native dblclick so Leaflet doesn't zoom
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    const domMoveHandler = (e: MouseEvent) => {
+      if (!isDrawingRef.current || verticesRef.current.length === 0) return;
       const last = verticesRef.current[verticesRef.current.length - 1];
+      const latlng = map.mouseEventToLatLng(e);
       previewLineRef.current?.remove();
-      previewLineRef.current = L.polyline([last, [e.latlng.lat, e.latlng.lng]], {
+      previewLineRef.current = L.polyline([last, [latlng.lat, latlng.lng]], {
         color: "#ef4444", weight: 1.5, dashArray: "4 4", opacity: 0.6,
       });
       drawLayerRef.current.addLayer(previewLineRef.current);
     };
 
-    // Double-click to finish
-    map.once("dblclick", () => { if (isDrawingRef.current) finishDrawing(); });
+    drawHandlerRef.current = domClickHandler;
+    dblClickHRef.current   = domDblClickHandler;
+    mouseMoveHRef.current  = domMoveHandler;
 
-    drawHandlerRef.current = clickHandler;
-    mouseMoveHRef.current  = mouseMoveHandler;
-    map.on("click", clickHandler);
-    map.on("mousemove", mouseMoveHandler);
+    container.addEventListener("click",     domClickHandler,    { capture: true });
+    container.addEventListener("dblclick",  domDblClickHandler, { capture: true });
+    container.addEventListener("mousemove", domMoveHandler);
   }
 
   function finishDrawing() {
@@ -306,15 +387,27 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
 
     isDrawingRef.current = false;
     setDrawing(false);
-    map.getContainer().style.cursor = "";
 
-    if (drawHandlerRef.current)  { map.off("click",     drawHandlerRef.current);  drawHandlerRef.current = null; }
-    if (mouseMoveHRef.current)   { map.off("mousemove", mouseMoveHRef.current);   mouseMoveHRef.current  = null; }
+    const container = map.getContainer();
+    container.style.cursor = "";
+    map.dragging.enable();
+
+    if (drawHandlerRef.current) {
+      container.removeEventListener("click", drawHandlerRef.current, { capture: true });
+      drawHandlerRef.current = null;
+    }
+    if (dblClickHRef.current) {
+      container.removeEventListener("dblclick", dblClickHRef.current, { capture: true });
+      dblClickHRef.current = null;
+    }
+    if (mouseMoveHRef.current) {
+      container.removeEventListener("mousemove", mouseMoveHRef.current);
+      mouseMoveHRef.current = null;
+    }
 
     const verts = verticesRef.current;
     if (verts.length < 3) { clearDrawingLayers(L); onPolygonFilter?.(null); return; }
 
-    // Clear temp layers and show closed polygon
     clearDrawingLayers(L);
     drawPolygonRef.current = L.polygon(verts, {
       color: "#ef4444", weight: 2, fillColor: "#ef4444", fillOpacity: 0.08,
@@ -331,8 +424,20 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
   function clearDrawing() {
     const L = LeafletRef.current, map = mapInstance.current;
     if (L && map) {
-      if (drawHandlerRef.current)  { map.off("click",     drawHandlerRef.current);  drawHandlerRef.current = null; }
-      if (mouseMoveHRef.current)   { map.off("mousemove", mouseMoveHRef.current);   mouseMoveHRef.current  = null; }
+      const container = map.getContainer();
+      if (drawHandlerRef.current) {
+        container.removeEventListener("click", drawHandlerRef.current, { capture: true });
+        drawHandlerRef.current = null;
+      }
+      if (dblClickHRef.current) {
+        container.removeEventListener("dblclick", dblClickHRef.current, { capture: true });
+        dblClickHRef.current = null;
+      }
+      if (mouseMoveHRef.current) {
+        container.removeEventListener("mousemove", mouseMoveHRef.current);
+        mouseMoveHRef.current = null;
+      }
+      map.dragging.enable();
       clearDrawingLayers(L);
     }
     isDrawingRef.current = false;

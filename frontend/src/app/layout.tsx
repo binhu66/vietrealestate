@@ -3,6 +3,7 @@ import "./globals.css";
 import LocaleProvider from "@/components/layout/LocaleProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import AgentWidget from "@/components/AgentWidget";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <AgentWidget />
         </LocaleProvider>
       </body>
     </html>
