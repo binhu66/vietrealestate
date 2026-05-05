@@ -45,7 +45,7 @@ export default function Header() {
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Tài khoản";
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <header className="sticky top-0 z-[2000] bg-white shadow-sm border-b border-gray-100">
       {/* Top bar */}
       <div className="bg-red-600 text-white text-xs py-1 px-4 flex justify-between items-center">
         <span>📞 Hotline: 1800 6834 | 08:00 - 21:00</span>
