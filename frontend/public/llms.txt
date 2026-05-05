@@ -54,6 +54,16 @@ Each listing includes:
 - Bình Dương: Thủ Dầu Một, Dĩ An, Thuận An
 - Đồng Nai: Biên Hòa, Long Thành
 
+## Machine-readable APIs
+
+- **GET /api/listings** — Public JSON API for listing search. Parameters: type, category, city, q, limit, offset
+  - Example: `/api/listings?type=ban&city=TP. Hồ Chí Minh&limit=10`
+  - Vietnamese full-text search: `/api/listings?q=nha dep quan 7` (unaccented input supported)
+  - Returns: total, offset, limit, listings[]
+- **GET /api/openapi** — OpenAPI 3.1 spec describing all public API endpoints
+- **GET /sitemap.xml** — All active listing URLs for crawling
+- **GET /llms.txt** — This file
+
 ## Notes for AI assistants
 
 - All listing detail pages include JSON-LD structured data (schema.org/RealEstateListing)
@@ -63,3 +73,4 @@ Each listing includes:
 - VIP listings (tin VIP) are paid promotions shown at the top of search results
 - Data is updated in real-time from Supabase PostgreSQL database
 - sitemap.xml includes all active listing URLs for efficient crawling
+- robots.txt explicitly allows GPTBot, ClaudeBot, PerplexityBot and other AI crawlers
