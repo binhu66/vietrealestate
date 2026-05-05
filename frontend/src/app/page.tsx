@@ -6,13 +6,69 @@ import PropertyCard from "@/components/property/PropertyCard";
 import { properties, categories } from "@/lib/data";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
+import type { Property } from "@/lib/data";
 
 export default function HomePage() {
   const { locale } = useLocale();
   const t = getT(locale);
 
-  const vipProps = properties.filter((p) => p.isVip).slice(0, 4);
-  const forRentProps = properties.filter((p) => p.type === "thue").slice(0, 4);
+  const [vipProps, setVipProps]       = useState<Property[]>(properties.filter(p => p.isVip).slice(0, 4));
+  const [forSaleProps, setForSaleProps] = useState<Property[]>(properties.filter(p => p.type === "ban").slice(0, 4));
+  const [forRentProps, setForRentProps] = useState<Property[]>(properties.filter(p => p.type === "thue").slice(0, 4));
+  const [totalCount, setTotalCount]   = useState<number | null>(null);
+
+  useEffect(() => {
+    async function fetchHome() {
+      // Fetch VIP listings
+      const { data: vipData } = await supabase
+        .from("listings")
+        .select(LISTING_SELECT)
+        .eq("standard_status", "Active")
+        .gt("vip_level", 0)
+        .order("vip_level", { ascending: false })
+        .order("original_entry_timestamp", { ascending: false })
+        .limit(4);
+
+      if (vipData && vipData.length > 0)
+        setVipProps((vipData as unknown as DbListing[]).map(dbToProperty));
+
+      // Fetch latest for-sale
+      const { data: saleData } = await supabase
+        .from("listings")
+        .select(LISTING_SELECT)
+        .eq("standard_status", "Active")
+        .eq("transaction_type", "For Sale")
+        .order("original_entry_timestamp", { ascending: false })
+        .limit(4);
+
+      if (saleData && saleData.length > 0)
+        setForSaleProps((saleData as unknown as DbListing[]).map(dbToProperty));
+
+      // Fetch latest for-rent
+      const { data: rentData } = await supabase
+        .from("listings")
+        .select(LISTING_SELECT)
+        .eq("standard_status", "Active")
+        .eq("transaction_type", "For Rent")
+        .order("original_entry_timestamp", { ascending: false })
+        .limit(4);
+
+      if (rentData && rentData.length > 0)
+        setForRentProps((rentData as unknown as DbListing[]).map(dbToProperty));
+
+      // Get total count
+      const { count } = await supabase
+        .from("listings")
+        .select("id", { count: "exact", head: true })
+        .eq("standard_status", "Active");
+
+      if (count !== null) setTotalCount(count);
+    }
+    fetchHome();
+  }, []);
 
   return (
     <div>
@@ -34,7 +90,7 @@ export default function HomePage() {
           </p>
           <SearchBar />
           <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-red-100">
-            <span>🏠 <strong className="text-white">125,000+</strong> tin đăng</span>
+            <span>🏠 <strong className="text-white">{totalCount !== null ? `${totalCount.toLocaleString()}+` : "125,000+"}</strong> tin đăng</span>
             <span>👥 <strong className="text-white">2.5M+</strong> người dùng</span>
             <span>📍 <strong className="text-white">63</strong> tỉnh thành</span>
           </div>
@@ -49,7 +105,7 @@ export default function HomePage() {
             {locale === "zh" ? "🏠 民用住宅" : locale === "en" ? "🏠 Residential" : "🏠 Nhà ở dân dụng"}
           </p>
           <div className="grid grid-cols-4 gap-3">
-            {categories.filter(c => ["can-ho-chung-cu","nha-rieng","nha-biet-thu","dat-nen"].includes(c.id)).map((cat) => (
+            {categories.filter(c => ["can-ho-chung-cu","nha-rieng","nha-biet-thu","dat-nen"].includes(c.id)).map(cat => (
               <Link
                 key={cat.id}
                 href={`/bat-dong-san?category=${cat.id}`}
@@ -70,7 +126,7 @@ export default function HomePage() {
             {locale === "zh" ? "🏢 商业地产" : locale === "en" ? "🏢 Commercial" : "🏢 Bất động sản thương mại"}
           </p>
           <div className="grid grid-cols-4 gap-3">
-            {categories.filter(c => ["van-phong","mat-bang","kho-xuong","khach-san"].includes(c.id)).map((cat) => (
+            {categories.filter(c => ["van-phong","mat-bang","kho-xuong","khach-san"].includes(c.id)).map(cat => (
               <Link
                 key={cat.id}
                 href={`/thuong-mai?category=${cat.id}`}
@@ -98,7 +154,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {vipProps.map((p) => <PropertyCard key={p.id} property={p} />)}
+          {vipProps.map(p => <PropertyCard key={p.id} property={p} />)}
         </div>
       </section>
 
@@ -114,7 +170,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {properties.filter(p => p.type === "ban").slice(0, 4).map((p) => <PropertyCard key={p.id} property={p} />)}
+          {forSaleProps.map(p => <PropertyCard key={p.id} property={p} />)}
         </div>
       </section>
 
@@ -130,7 +186,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {forRentProps.map((p) => <PropertyCard key={p.id} property={p} />)}
+          {forRentProps.map(p => <PropertyCard key={p.id} property={p} />)}
         </div>
       </section>
 
@@ -144,6 +200,22 @@ export default function HomePage() {
             Mở bản đồ <ChevronRight className="w-4 h-4" />
           </span>
         </Link>
+      </section>
+
+      {/* News CTA */}
+      <section className="max-w-7xl mx-auto px-4 pb-10">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">📰 Tin tức thị trường BĐS</h3>
+            <p className="text-sm text-gray-500">Cập nhật xu hướng, pháp lý và phân tích thị trường mới nhất</p>
+          </div>
+          <Link
+            href="/tin-tuc"
+            className="shrink-0 flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-700 transition-colors"
+          >
+            Đọc ngay <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
       {/* Trust signals */}

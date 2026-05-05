@@ -1,15 +1,65 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { properties, formatPrice } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
+import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
+import type { Property } from "@/lib/data";
 import PropertyDetailClient from "./PropertyDetailClient";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+
+// UUID pattern check
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function fetchProperty(id: string): Promise<Property | null> {
+  // UUID → fetch from Supabase
+  if (UUID_RE.test(id)) {
+    const { data, error } = await supabase
+      .from("listings")
+      .select(LISTING_SELECT)
+      .eq("id", id)
+      .eq("standard_status", "Active")
+      .single();
+    if (error || !data) return null;
+    return dbToProperty(data as unknown as DbListing);
+  }
+  // numeric string → hardcoded fallback
+  return properties.find((p) => p.id === id) ?? null;
+}
+
+async function fetchSimilar(property: Property): Promise<Property[]> {
+  if (UUID_RE.test(property.id)) {
+    // Map category slug → property_type
+    const categoryToType: Record<string, string> = {
+      "can-ho-chung-cu": "apartment",
+      "nha-rieng": "house",
+      "nha-biet-thu": "villa",
+      "dat-nen": "land",
+      "mat-bang": "commercial",
+      "kho-xuong": "warehouse",
+      "van-phong": "office",
+    };
+    const pt = categoryToType[property.category] ?? "apartment";
+    const { data } = await supabase
+      .from("listings")
+      .select(LISTING_SELECT)
+      .eq("standard_status", "Active")
+      .eq("property_type", pt)
+      .neq("id", property.id)
+      .order("vip_level", { ascending: false })
+      .limit(4);
+    if (data && data.length > 0) return (data as unknown as DbListing[]).map(dbToProperty);
+  }
+  return properties
+    .filter((p) => p.id !== property.id && p.category === property.category)
+    .slice(0, 4);
+}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params;
-  const p = properties.find((x) => x.id === id);
+  const p = await fetchProperty(id);
   if (!p) return { title: "Không tìm thấy - VietRealty" };
 
   const price = formatPrice(p.price, p.priceUnit);
@@ -36,76 +86,56 @@ export async function generateMetadata(
     alternates: {
       canonical: `${BASE_URL}/bat-dong-san/${p.id}`,
     },
-    other: {
-      "og:price:amount": String(p.price),
-      "og:price:currency": "VND",
-    },
   };
-}
-
-export function generateStaticParams() {
-  return properties.map((p) => ({ id: p.id }));
 }
 
 export default async function PropertyDetailPage(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const property = properties.find((p) => p.id === id);
+  const property = await fetchProperty(id);
   if (!property) notFound();
 
-  const similar = properties
-    .filter((p) => p.id !== property.id && p.category === property.category)
-    .slice(0, 4);
+  const similar = await fetchSimilar(property);
 
-  // JSON-LD structured data for Google + AI crawlers
-  const priceVnd = property.price * (
-    property.priceUnit === "ty" ? 1_000_000_000
-    : property.priceUnit === "trieu" ? 1_000_000
-    : property.priceUnit === "trieu/thang" ? 1_000_000
-    : 1_000
-  );
+  const priceVnd =
+    property.priceUnit === "ty" ? property.price * 1_000_000_000
+    : property.priceUnit === "trieu" ? property.price * 1_000_000
+    : property.priceUnit === "trieu/thang" ? property.price * 1_000_000
+    : property.price * 1_000;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
     "@id": `${BASE_URL}/bat-dong-san/${property.id}`,
-    "name": property.title,
-    "description": property.description,
-    "url": `${BASE_URL}/bat-dong-san/${property.id}`,
-    "image": property.images,
-    "datePosted": property.postedAt,
-    "floorSize": {
-      "@type": "QuantitativeValue",
-      "value": property.area,
-      "unitCode": "MTK",
-    },
-    "numberOfRooms": property.bedrooms,
-    "numberOfBathroomsTotal": property.bathrooms,
-    "address": {
+    name: property.title,
+    description: property.description,
+    url: `${BASE_URL}/bat-dong-san/${property.id}`,
+    image: property.images,
+    datePosted: property.postedAt,
+    floorSize: { "@type": "QuantitativeValue", value: property.area, unitCode: "MTK" },
+    numberOfRooms: property.bedrooms,
+    numberOfBathroomsTotal: property.bathrooms,
+    address: {
       "@type": "PostalAddress",
-      "streetAddress": property.address,
-      "addressLocality": property.district,
-      "addressRegion": property.city,
-      "addressCountry": "VN",
+      streetAddress: property.address,
+      addressLocality: property.district,
+      addressRegion: property.city,
+      addressCountry: "VN",
     },
     ...(property.lat && property.lng ? {
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": property.lat,
-        "longitude": property.lng,
-      }
+      geo: { "@type": "GeoCoordinates", latitude: property.lat, longitude: property.lng },
     } : {}),
-    "offers": {
+    offers: {
       "@type": "Offer",
-      "price": priceVnd,
-      "priceCurrency": "VND",
-      "availability": "https://schema.org/InStock",
+      price: priceVnd,
+      priceCurrency: "VND",
+      availability: "https://schema.org/InStock",
     },
-    "seller": {
+    seller: {
       "@type": "Person",
-      "name": property.contactName,
-      "telephone": property.contactPhone,
+      name: property.contactName,
+      telephone: property.contactPhone,
     },
   };
 

@@ -1,12 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { properties, formatPrice, categories } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import Link from "next/link";
 import { SlidersHorizontal, X, ChevronDown, MapPin } from "lucide-react";
 import MapFilterModal, { type MapFilters, EMPTY_FILTERS } from "@/components/map/MapFilterModal";
+import { supabase } from "@/lib/supabase";
+import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
 
 const PropertyMap = dynamic(() => import("@/components/map/PropertyMap"), { ssr: false });
 
@@ -42,6 +44,26 @@ function MapContent() {
   const [sortOpen, setSortOpen]           = useState(false);
   const [sort, setSort]                   = useState<"newest" | "price_asc" | "price_desc">("newest");
   const [polygonIds, setPolygonIds]       = useState<string[] | null>(null);
+  const [allListings, setAllListings]     = useState<Property[]>(properties);
+
+  // Fetch all active listings from Supabase (with coords for map)
+  useEffect(() => {
+    async function fetchAll() {
+      const { data, error } = await supabase
+        .from("listings")
+        .select(LISTING_SELECT)
+        .eq("standard_status", "Active")
+        .not("lat", "is", null)
+        .order("vip_level", { ascending: false })
+        .order("original_entry_timestamp", { ascending: false })
+        .limit(500);
+
+      if (!error && data && data.length > 0) {
+        setAllListings((data as unknown as DbListing[]).map(dbToProperty));
+      }
+    }
+    fetchAll();
+  }, []);
 
   // ── Active filter chips ──────────────────────────────────────────────────
   const activeChips: { label: string; clear: () => void }[] = [];
@@ -77,40 +99,33 @@ function MapContent() {
 
   // ── Filter + sort logic ──────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    let list = properties.filter(p => {
-      // Tab
+    let list = allListings.filter(p => {
       if (tab === "ban" && p.type !== "ban") return false;
       if (tab === "thue" && p.type !== "thue") return false;
       if (tab === "thuong-mai" && !COMMERCIAL_IDS.includes(p.category)) return false;
 
-      // Category
       if (filters.categoryIds.length > 0 && !filters.categoryIds.includes(p.category)) return false;
 
-      // Price
       if (filters.priceMin !== undefined || filters.priceMax !== undefined) {
         const pt = priceInTy(p);
         if (filters.priceMin !== undefined && pt < filters.priceMin) return false;
         if (filters.priceMax !== undefined && filters.priceMax < 9999 && pt > filters.priceMax) return false;
       }
 
-      // Bedrooms
       if (filters.bedroomsMin !== undefined && (p.bedrooms ?? 0) < filters.bedroomsMin) return false;
 
-      // Area
       if (filters.areaMin !== undefined && p.area < filters.areaMin) return false;
       if (filters.areaMax !== undefined && filters.areaMax < 9999 && p.area > filters.areaMax) return false;
 
       return true;
     });
 
-    // Polygon filter (draw tool)
     if (polygonIds !== null) list = list.filter(p => polygonIds.includes(p.id));
 
-    // Sort
     if (sort === "price_asc")  list = [...list].sort((a, b) => priceInTy(a) - priceInTy(b));
     if (sort === "price_desc") list = [...list].sort((a, b) => priceInTy(b) - priceInTy(a));
     return list;
-  }, [tab, filters, sort, polygonIds]);
+  }, [allListings, tab, filters, sort, polygonIds]);
 
   const mapFiltered = filtered.filter(p => p.lat && p.lng);
 
@@ -159,7 +174,6 @@ function MapContent() {
         {/* Filter bar */}
         <div className="px-3 py-2 border-b border-gray-100 space-y-2">
           <div className="flex items-center gap-2">
-            {/* Filter button */}
             <button
               onClick={() => setModalOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${countActiveFilters(filters) > 0 ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-700 hover:border-gray-300"}`}
@@ -173,7 +187,6 @@ function MapContent() {
               )}
             </button>
 
-            {/* Sort dropdown */}
             <div className="relative ml-auto">
               <button
                 onClick={() => setSortOpen(o => !o)}
@@ -198,7 +211,6 @@ function MapContent() {
             </div>
           </div>
 
-          {/* Active filter chips */}
           {activeChips.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {activeChips.map(chip => (
@@ -274,7 +286,6 @@ function MapContent() {
         />
       </div>
 
-      {/* ── Filter modal ─────────────────────────────────────────────── */}
       <MapFilterModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

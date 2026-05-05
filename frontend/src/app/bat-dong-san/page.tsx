@@ -1,13 +1,16 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, Grid3X3, List, ChevronDown, MapPin } from "lucide-react";
+import { SlidersHorizontal, Grid3X3, List, Loader2 } from "lucide-react";
 import { Suspense } from "react";
 import PropertyCard from "@/components/property/PropertyCard";
 import { properties, categories, cities, type Category, type PropertyType } from "@/lib/data";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import SearchBar from "@/components/property/SearchBar";
+import { supabase } from "@/lib/supabase";
+import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
+import type { Property } from "@/lib/data";
 
 function ListingsContent() {
   const searchParams = useSearchParams();
@@ -28,15 +31,56 @@ function ListingsContent() {
     bedrooms: "",
   });
 
+  const [listings, setListings] = useState<Property[]>(properties);
+  const [loading, setLoading] = useState(true);
+  const [fromSupabase, setFromSupabase] = useState(false);
+
   const q = searchParams.get("q") || "";
 
+  useEffect(() => {
+    async function fetchListings() {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("listings")
+          .select(LISTING_SELECT)
+          .eq("standard_status", "Active")
+          .order("vip_level", { ascending: false })
+          .order("original_entry_timestamp", { ascending: false })
+          .limit(100);
+
+        if (!error && data && data.length > 0) {
+          setListings((data as unknown as DbListing[]).map(dbToProperty));
+          setFromSupabase(true);
+        }
+      } catch {
+        // keep hardcoded fallback
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchListings();
+  }, []);
+
   const filtered = useMemo(() => {
-    let result = [...properties];
+    let result = [...listings];
     if (filters.type) result = result.filter(p => p.type === filters.type);
     if (filters.category) result = result.filter(p => p.category === filters.category);
     if (filters.city) result = result.filter(p => p.city === filters.city);
-    if (filters.minPrice) result = result.filter(p => p.price >= Number(filters.minPrice));
-    if (filters.maxPrice) result = result.filter(p => p.price <= Number(filters.maxPrice));
+    if (filters.minPrice) {
+      const min = Number(filters.minPrice);
+      result = result.filter(p => {
+        const vnd = p.priceUnit === "ty" ? p.price * 1e9 : p.priceUnit === "trieu" ? p.price * 1e6 : p.price * 1e6;
+        return vnd >= min * 1e9;
+      });
+    }
+    if (filters.maxPrice) {
+      const max = Number(filters.maxPrice);
+      result = result.filter(p => {
+        const vnd = p.priceUnit === "ty" ? p.price * 1e9 : p.priceUnit === "trieu" ? p.price * 1e6 : p.price * 1e6;
+        return vnd <= max * 1e9;
+      });
+    }
     if (filters.minArea) result = result.filter(p => p.area >= Number(filters.minArea));
     if (filters.maxArea) result = result.filter(p => p.area <= Number(filters.maxArea));
     if (q) {
@@ -51,23 +95,23 @@ function ListingsContent() {
     if (sortBy === "price_desc") result.sort((a, b) => b.price - a.price);
     if (sortBy === "area_desc") result.sort((a, b) => b.area - a.area);
     return result;
-  }, [filters, q, sortBy]);
+  }, [listings, filters, q, sortBy]);
+
+  // Unique cities from current listings
+  const availableCities = useMemo(() => {
+    if (fromSupabase) {
+      const set = new Set(listings.map(p => p.city));
+      return Array.from(set).sort();
+    }
+    return cities;
+  }, [listings, fromSupabase]);
 
   function updateFilter(key: string, value: string) {
     setFilters(prev => ({ ...prev, [key]: value }));
   }
 
-  const priceRanges = [
-    { label: "Dưới 1 tỷ", min: 0, max: 1 },
-    { label: "1 - 3 tỷ", min: 1, max: 3 },
-    { label: "3 - 5 tỷ", min: 3, max: 5 },
-    { label: "5 - 10 tỷ", min: 5, max: 10 },
-    { label: "Trên 10 tỷ", min: 10, max: 9999 },
-  ];
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* Search bar */}
       <div className="mb-6">
         <SearchBar />
       </div>
@@ -105,7 +149,7 @@ function ListingsContent() {
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="">Tất cả tỉnh/thành</option>
-                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
@@ -132,9 +176,9 @@ function ListingsContent() {
               </div>
             </div>
 
-            {/* Price range */}
+            {/* Price range (in tỷ) */}
             <div className="mb-4">
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">{t.filter.priceRange}</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">{t.filter.priceRange} (tỷ)</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -194,9 +238,11 @@ function ListingsContent() {
               >
                 <SlidersHorizontal className="w-4 h-4" /> Bộ lọc
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 flex items-center gap-1">
+                {loading && <Loader2 className="w-3 h-3 animate-spin" />}
                 <strong className="text-gray-900">{filtered.length}</strong> tin đăng
-                {q && <span> cho "<em>{q}</em>"</span>}
+                {q && <span> cho &ldquo;<em>{q}</em>&rdquo;</span>}
+                {fromSupabase && <span className="text-xs text-green-600 ml-1">● live</span>}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -228,7 +274,12 @@ function ListingsContent() {
           </div>
 
           {/* Results */}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-gray-400">
+              <Loader2 className="w-8 h-8 animate-spin mr-3" />
+              <span>Đang tải danh sách...</span>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <div className="text-5xl mb-4">🏚️</div>
               <p className="font-medium">Không tìm thấy bất động sản phù hợp</p>

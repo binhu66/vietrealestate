@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET() {
   const secretToken = process.env.MAPBOX_SECRET_TOKEN;
   const username    = process.env.MAPBOX_USERNAME;
