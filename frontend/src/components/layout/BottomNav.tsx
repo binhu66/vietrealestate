@@ -16,8 +16,8 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { locale } = useLocale();
 
-  // Hide on admin pages and map (map has its own full-screen layout)
-  if (pathname.startsWith("/admin") || pathname === "/ban-do") return null;
+  // Hide on admin pages, map, and property detail pages (those have their own sticky bar)
+  if (pathname.startsWith("/admin") || pathname === "/ban-do" || /^\/bat-dong-san\/.+/.test(pathname)) return null;
 
   return (
     <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 safe-bottom">
