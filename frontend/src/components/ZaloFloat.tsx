@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { ZALO_PHONE } from "@/lib/config";
 
-const ZALO_PHONE = "0901234567";
-const ZALO_URL   = `https://zalo.me/${ZALO_PHONE.replace(/^0/, "84")}`;
+const ZALO_URL = `https://zalo.me/${ZALO_PHONE.replace(/^0/, "84")}`;
 
 export default function ZaloFloat() {
   const [pulse, setPulse] = useState(true);

@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
-
-const ZALO_PHONE = "0901234567";
+import { ZALO_PHONE, HOTLINE, COMPANY_EMAIL } from "@/lib/config";
 
 export default function Footer() {
   const { locale } = useLocale();
@@ -23,7 +22,7 @@ export default function Footer() {
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">{t.footer.desc}</p>
             <div className="mt-4 space-y-2 text-sm text-gray-400">
-              <p>📞 Hotline: <a href="tel:18006834" className="text-white hover:text-red-400">1800 6834</a></p>
+              <p>📞 Hotline: <a href={`tel:${HOTLINE.replace(/\s/g, "")}`} className="text-white hover:text-red-400">{HOTLINE}</a></p>
               <p>
                 💬 Zalo:{" "}
                 <a
@@ -35,7 +34,7 @@ export default function Footer() {
                   {ZALO_PHONE}
                 </a>
               </p>
-              <p>✉️ <a href="mailto:info@vietrealty.vn" className="hover:text-red-400">info@vietrealty.vn</a></p>
+              <p>✉️ <a href={`mailto:${COMPANY_EMAIL}`} className="hover:text-red-400">{COMPANY_EMAIL}</a></p>
             </div>
           </div>
 
@@ -81,7 +80,7 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-3">Về chúng tôi</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/gioi-thieu"          className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
-              <li><a   href="mailto:info@vietrealty.vn" className="hover:text-red-400 transition-colors">{t.footer.contact}</a></li>
+              <li><a   href={`mailto:${COMPANY_EMAIL}`} className="hover:text-red-400 transition-colors">{t.footer.contact}</a></li>
               <li><Link href="/dieu-khoan"          className="hover:text-red-400 transition-colors">{t.footer.terms}</Link></li>
               <li><Link href="/chinh-sach-bao-mat"  className="hover:text-red-400 transition-colors">{t.footer.privacy}</Link></li>
             </ul>
