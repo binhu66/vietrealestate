@@ -60,9 +60,16 @@ export default function DangTinPage() {
     district:     "",
     city:         "",
     description:  "",
-    contactName:  "",
+    contactName:  user?.user_metadata?.display_name || "",
     contactPhone: "",
   });
+
+  // Pre-fill contact name once user loads
+  useEffect(() => {
+    if (user && !form.contactName) {
+      setForm(prev => ({ ...prev, contactName: user.user_metadata?.display_name || "" }));
+    }
+  }, [user]);
 
   function set(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -114,7 +121,7 @@ export default function DangTinPage() {
           contact_phone:       form.contactPhone,
           lat, lng,
           standard_status:     "Active",
-          posted_by:           null,
+          posted_by:           user?.id ?? null,
         })
         .select("id")
         .single();
