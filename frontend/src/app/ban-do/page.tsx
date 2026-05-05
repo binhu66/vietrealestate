@@ -138,7 +138,7 @@ function MapContent() {
   const SORT_LABELS = { newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần" };
 
   return (
-    <div className="flex h-[calc(100vh-5.75rem)]">
+    <div className="flex h-[calc(100vh-5.75rem)] -mb-14 sm:mb-0">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <div className="w-80 shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden hidden md:flex">
