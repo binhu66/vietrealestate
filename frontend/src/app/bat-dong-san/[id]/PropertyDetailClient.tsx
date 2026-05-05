@@ -221,6 +221,24 @@ export default function PropertyDetailClient({
               <svg viewBox="0 0 48 48" className="w-5 h-5 fill-white"><path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm9.6 27.2c-.4.8-1.6 1.6-2.8 1.6-.4 0-.8 0-1.2-.4-2-1.2-4-2.8-5.6-4.8-1.6-2-2.8-4-3.6-6-.4-.8-.4-1.6 0-2.4.4-.8 1.2-1.2 2-1.2.4 0 .8.4.8.4l1.6 2.4c.4.4.4 1.2 0 1.6l-.8.8c.4.8.8 1.6 1.6 2.4.8.8 1.6 1.2 2.4 1.6l.8-.8c.4-.4 1.2-.4 1.6 0l2.4 1.6c.4.4.4.4.4.8.4.4 0 1.2-.4 2z"/></svg>
               Chat Zalo
             </a>
+            {/* Quick inquiry */}
+            <div className="border-t border-gray-100 pt-4">
+              <p className="text-xs font-semibold text-gray-600 mb-2">📋 Yêu cầu xem nhà</p>
+              <textarea
+                placeholder="Nhắn tin cho chủ nhà: Tôi muốn xem nhà vào..."
+                rows={3}
+                className="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-400 resize-none"
+              />
+              <a
+                href={`https://zalo.me/${property.contactPhone?.replace(/^0/, "84")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 w-full bg-gray-900 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                Gửi qua Zalo
+              </a>
+            </div>
+
             <div className="text-xs text-gray-500 space-y-2 border-t border-gray-100 pt-3">
               <div className="flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5" />
