@@ -8,6 +8,7 @@ const zh: Translations = {
     banDo: "地图找房",
     tinTuc: "新闻资讯",
     dangTin: "发布房源",
+    moiGioi: "中介",
     dangnhap: "登录",
     dangky: "注册",
     admin: "管理后台",

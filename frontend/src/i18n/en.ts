@@ -8,6 +8,7 @@ const en: Translations = {
     banDo: "Map",
     tinTuc: "News",
     dangTin: "Post Listing",
+    moiGioi: "Agents",
     dangnhap: "Login",
     dangky: "Register",
     admin: "Admin",

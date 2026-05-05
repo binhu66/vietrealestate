@@ -28,6 +28,7 @@ export default function Header() {
     { href: "/cho-thue",     label: t.nav.thue },
     { href: "/thuong-mai",   label: t.nav.thuongMai },
     { href: "/ban-do",       label: t.nav.banDo },
+    { href: "/moi-gioi",     label: t.nav.moiGioi },
     { href: "/tin-tuc",      label: t.nav.tinTuc },
   ];
 

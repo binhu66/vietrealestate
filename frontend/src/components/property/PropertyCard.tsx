@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { Heart, Eye, MapPin, BedDouble, Bath, Maximize2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Property } from "@/lib/data";
 import { formatPrice } from "@/lib/data";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
+import { supabase } from "@/lib/supabase";
+import { useUser } from "@/lib/auth";
 
 interface Props {
   property: Property;
@@ -15,14 +16,44 @@ interface Props {
 export default function PropertyCard({ property }: Props) {
   const { locale } = useLocale();
   const t = getT(locale);
+  const { user } = useUser();
   const [saved, setSaved] = useState(false);
+  const [savePending, setSavePending] = useState(false);
+
+  // Check if already saved
+  useEffect(() => {
+    if (!user || !/^[0-9a-f-]{36}$/i.test(property.id)) return;
+    supabase
+      .from("saved_listings")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("listing_id", property.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setSaved(true); });
+  }, [user, property.id]);
+
+  async function toggleSave(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!user) {
+      window.location.href = "/dang-nhap?redirect=" + window.location.pathname;
+      return;
+    }
+    if (!/^[0-9a-f-]{36}$/i.test(property.id)) return;
+    setSavePending(true);
+    if (saved) {
+      await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", property.id);
+      setSaved(false);
+    } else {
+      await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: property.id });
+      setSaved(true);
+    }
+    setSavePending(false);
+  }
 
   const title =
-    locale === "en" && property.titleEn
-      ? property.titleEn
-      : locale === "zh" && property.titleZh
-      ? property.titleZh
-      : property.title;
+    locale === "en" && property.titleEn ? property.titleEn
+    : locale === "zh" && property.titleZh ? property.titleZh
+    : property.title;
 
   return (
     <div className="group bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
@@ -48,10 +79,11 @@ export default function PropertyCard({ property }: Props) {
 
         {/* Save button */}
         <button
-          onClick={(e) => { e.preventDefault(); setSaved(!saved); }}
-          className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow"
+          onClick={toggleSave}
+          disabled={savePending}
+          className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow disabled:opacity-60"
         >
-          <Heart className={`w-4 h-4 ${saved ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
+          <Heart className={`w-4 h-4 transition-colors ${saved ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
         </button>
 
         {/* Image count */}
@@ -64,7 +96,6 @@ export default function PropertyCard({ property }: Props) {
 
       {/* Content */}
       <div className="p-3">
-        {/* Price */}
         <div className="flex items-center justify-between mb-1">
           <span className="text-red-600 font-bold text-lg leading-tight">
             {formatPrice(property.price, property.priceUnit)}
@@ -72,20 +103,17 @@ export default function PropertyCard({ property }: Props) {
           <span className="text-gray-500 text-xs">{property.area} m²</span>
         </div>
 
-        {/* Title */}
         <Link href={`/bat-dong-san/${property.id}`}>
           <h3 className="text-sm font-medium text-gray-800 line-clamp-2 hover:text-red-600 transition-colors mb-2 min-h-[2.5rem]">
             {title}
           </h3>
         </Link>
 
-        {/* Location */}
         <div className="flex items-center gap-1 text-gray-500 text-xs mb-2">
           <MapPin className="w-3 h-3 shrink-0" />
           <span className="truncate">{property.district}, {property.city}</span>
         </div>
 
-        {/* Details row */}
         <div className="flex items-center gap-3 text-gray-500 text-xs border-t border-gray-100 pt-2">
           {property.bedrooms && (
             <span className="flex items-center gap-1">

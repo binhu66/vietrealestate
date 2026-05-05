@@ -6,6 +6,7 @@ const vi = {
     banDo: "Bản đồ",
     tinTuc: "Tin tức",
     dangTin: "Đăng tin",
+    moiGioi: "Môi giới",
     dangnhap: "Đăng nhập",
     dangky: "Đăng ký",
     admin: "Quản trị",
