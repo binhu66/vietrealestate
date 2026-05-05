@@ -138,7 +138,7 @@ function MapContent() {
   const SORT_LABELS = { newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần" };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-[calc(100vh-5.75rem)]">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <div className="w-80 shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden hidden md:flex">
@@ -300,7 +300,7 @@ function MapContent() {
 export default function BanDoPage() {
   return (
     <Suspense fallback={
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center text-gray-500">
+      <div className="h-[calc(100vh-5.75rem)] flex items-center justify-center text-gray-500">
         <div className="text-center space-y-2">
           <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm">Đang tải bản đồ...</p>

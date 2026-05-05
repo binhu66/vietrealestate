@@ -120,7 +120,7 @@ export default function MoiGioiPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 mb-8">
         {[
           { value: AGENTS.length, label: locale === "zh" ? "活跃中介" : locale === "en" ? "Active Agents" : "Môi giới đang hoạt động" },
           { value: AGENTS.filter(a => a.verified).length, label: locale === "zh" ? "已认证" : locale === "en" ? "Verified" : "Đã xác minh" },
