@@ -71,7 +71,11 @@ export default function PropertyDetailClient({
           {/* Image gallery */}
           <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
             <div className="relative aspect-video bg-gray-100">
-              <img src={property.images[imgIdx]} alt={title} className="w-full h-full object-cover" />
+              {property.images[imgIdx] ? (
+                <img src={property.images[imgIdx]} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-6xl text-gray-200">🏠</div>
+              )}
               {property.images.length > 1 && (
                 <>
                   <button

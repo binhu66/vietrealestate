@@ -32,12 +32,12 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
     return (
       <div className="group bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden flex">
         {/* Image */}
-        <Link href={`/bat-dong-san/${property.id}`} className="block relative shrink-0 w-32 sm:w-44 overflow-hidden">
-          <img
-            src={property.images[0]}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+        <Link href={`/bat-dong-san/${property.id}`} className="block relative shrink-0 w-32 sm:w-44 overflow-hidden bg-gray-100">
+          {property.images[0] ? (
+            <img src={property.images[0]} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl text-gray-200">🏠</div>
+          )}
           <div className="absolute top-1.5 left-1.5 flex gap-1">
             {property.isVip && (
               <span className="bg-yellow-400 text-yellow-900 text-[9px] font-bold px-1.5 py-0.5 rounded-full">VIP</span>
@@ -87,12 +87,12 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
   return (
     <div className="group bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
       {/* Image */}
-      <Link href={`/bat-dong-san/${property.id}`} className="block relative aspect-[4/3] overflow-hidden">
-        <img
-          src={property.images[0]}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+      <Link href={`/bat-dong-san/${property.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100">
+        {property.images[0] ? (
+          <img src={property.images[0]} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-5xl text-gray-200">🏠</div>
+        )}
 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1">
