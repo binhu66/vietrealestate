@@ -80,9 +80,9 @@ export default function Footer() {
             </Link>
             <h4 className="text-white font-semibold mb-3">Về chúng tôi</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
-              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.contact}</Link></li>
-              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.terms}</Link></li>
+              <li><Link href="/gioi-thieu"          className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
+              <li><a   href="mailto:info@vietrealty.vn" className="hover:text-red-400 transition-colors">{t.footer.contact}</a></li>
+              <li><Link href="/dieu-khoan"          className="hover:text-red-400 transition-colors">{t.footer.terms}</Link></li>
               <li><Link href="/chinh-sach-bao-mat"  className="hover:text-red-400 transition-colors">{t.footer.privacy}</Link></li>
             </ul>
             <div className="mt-4 p-3 bg-gray-800 rounded-lg">
