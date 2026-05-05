@@ -9,6 +9,7 @@ import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapt
 import { formatPrice } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import { useLocale } from "@/lib/locale";
+import { useSaved } from "@/lib/savedContext";
 
 type Tab = "listings" | "saved" | "profile";
 
@@ -16,6 +17,7 @@ export default function TaiKhoanPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useUser();
   const { locale } = useLocale();
+  const { toggle: toggleSavedCtx } = useSaved();
 
   const [tab, setTab]               = useState<Tab>("listings");
   const [myListings, setMyListings] = useState<Property[]>([]);
@@ -93,8 +95,8 @@ export default function TaiKhoanPage() {
 
   async function unsaveListing(listingId: string) {
     if (!user) return;
-    await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", listingId);
     setSaved(prev => prev.filter(p => p.id !== listingId));
+    await toggleSavedCtx(listingId); // updates both Supabase and SavedContext
   }
 
   if (authLoading) {
