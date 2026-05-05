@@ -7,53 +7,59 @@ import Link from "next/link";
 import { MapPin, X, Plus, Minus, Locate, Layers, Check } from "lucide-react";
 import { HandTap } from "@phosphor-icons/react";
 
-// ── Marker HTML helpers ───────────────────────────────────────────────────────
-function pricePillHtml(price: string, color: string, isVip: boolean) {
-  const ring = isVip ? `outline:2px solid #f59e0b;outline-offset:2px;` : "";
+// ── Marker HTML helpers — yhouse-style ────────────────────────────────────────
+// White pill, accent color top bar, black price text, drop shadow, caret pointer
+function pricePillHtml(price: string, accentColor: string, isVip: boolean, txType: "ban" | "thue") {
+  const vipGlow = isVip ? `box-shadow:0 0 0 2.5px #f59e0b,0 4px 16px rgba(0,0,0,.25);` : `box-shadow:0 2px 12px rgba(0,0,0,.18);`;
+  const tag = txType === "thue"
+    ? `<span style="font-size:8px;font-weight:600;color:${accentColor};letter-spacing:.3px;line-height:1;display:block;margin-bottom:2px;">THUÊ</span>`
+    : "";
   return `
-    <div style="position:relative;display:inline-block;">
+    <div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;">
       <div style="
-        background:${color};color:#fff;
-        padding:5px 10px 5px;
-        border-radius:8px;
-        font-size:12px;font-weight:700;
-        white-space:nowrap;
-        box-shadow:0 2px 10px rgba(0,0,0,.22);
-        border:2.5px solid #fff;
-        ${ring}
+        background:#fff;
+        border-radius:10px;
+        padding:5px 11px 5px;
+        ${vipGlow}
+        border-top:3px solid ${accentColor};
         cursor:pointer;
-        transition:transform .12s;
-      ">${price}</div>
-      <div style="
-        position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-        width:0;height:0;
-        border-left:6px solid transparent;
-        border-right:6px solid transparent;
-        border-top:6px solid ${color};
-      "></div>
+        white-space:nowrap;
+        transition:transform .1s,box-shadow .1s;
+      ">
+        ${tag}
+        <span style="font-size:12.5px;font-weight:800;color:#111;line-height:1.1;">${price}</span>
+      </div>
+      <svg width="12" height="7" viewBox="0 0 12 7" style="display:block;margin-top:-1px;">
+        <path d="M0 0 L6 7 L12 0 Z" fill="#fff" />
+        <path d="M0 3 L6 7 L12 3" stroke="rgba(0,0,0,.06)" stroke-width="1" fill="none"/>
+      </svg>
     </div>`;
 }
 
 function clusterHtml(count: number) {
-  const s = count < 10 ? 34 : count < 50 ? 42 : count < 200 ? 50 : 58;
-  const fs = count < 10 ? 13 : count < 100 ? 12 : 11;
+  // Outer halo size scales log with count; inner circle constant brand color
+  const inner = count < 10 ? 30 : count < 50 ? 36 : count < 200 ? 42 : 48;
+  const outer  = inner + 14;
+  const fs     = count < 10 ? 13 : count < 100 ? 12 : 11;
+  const label  = count > 999 ? "999+" : String(count);
   return `
     <div style="
-      width:${s}px;height:${s}px;
+      width:${outer}px;height:${outer}px;
       border-radius:50%;
-      background:rgba(220,38,38,0.15);
+      background:rgba(220,38,38,.12);
       display:flex;align-items:center;justify-content:center;
     ">
       <div style="
-        width:${s - 10}px;height:${s - 10}px;
+        width:${inner}px;height:${inner}px;
         border-radius:50%;
         background:#dc2626;
         color:#fff;
-        font-size:${fs}px;font-weight:700;
+        font-size:${fs}px;font-weight:800;
+        letter-spacing:-.3px;
         display:flex;align-items:center;justify-content:center;
-        box-shadow:0 2px 8px rgba(220,38,38,.45);
+        box-shadow:0 3px 10px rgba(220,38,38,.5);
         border:2.5px solid #fff;
-      ">${count > 999 ? "999+" : count}</div>
+      ">${label}</div>
     </div>`;
 }
 
@@ -266,7 +272,7 @@ export default function PropertyMap({ properties, focusLat, focusLng, focusId, o
       const price = formatPrice(prop.price, prop.priceUnit);
       const icon = L.divIcon({
         className: "",
-        html: pricePillHtml(price, color, prop.isVip),
+        html: pricePillHtml(price, color, prop.isVip, prop.type as "ban" | "thue"),
         iconSize: undefined as any,
         iconAnchor: [0, 0],
       });
