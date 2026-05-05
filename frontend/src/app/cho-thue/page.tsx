@@ -35,7 +35,7 @@ function ChoThueContent() {
 
       if (category) query = query.eq("category", category);
       if (city)     query = query.eq("tinh_thanh", city);
-      if (q)        query = query.ilike("title", `%${q}%`);
+      if (q)        query = query.textSearch("search_vector", q, { type: "websearch", config: "simple" });
 
       const { data, error } = await query;
       if (!error && data && data.length > 0)

@@ -58,7 +58,7 @@ function ListingsContent() {
       if (filters.type === "ban")  query = query.eq("transaction_type", "For Sale");
       if (filters.type === "thue") query = query.eq("transaction_type", "For Rent");
       if (filters.city) query = query.eq("tinh_thanh", filters.city);
-      if (q) query = query.or(`title.ilike.%${q}%,unparsed_address.ilike.%${q}%,quan_huyen.ilike.%${q}%`);
+      if (q) query = query.textSearch("search_vector", q, { type: "websearch", config: "simple" });
 
       const { data, error, count } = await query;
       if (!error && data) {
