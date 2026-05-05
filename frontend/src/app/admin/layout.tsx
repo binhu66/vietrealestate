@@ -5,7 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Building2, Users, LogOut, Menu, X, Sun, Moon } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
+import { supabase } from "@/lib/supabase";
 
+const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+
+// Keep context for backwards compat with admin/page.tsx
 type AuthCtx = { token: string | null; setToken: (t: string | null) => void };
 export const AdminAuthContext = createContext<AuthCtx>({ token: null, setToken: () => {} });
 export const useAdminAuth = () => useContext(AdminAuthContext);
@@ -24,10 +28,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("admin_token");
-    setToken(storedToken);
+    // Use Supabase session instead of localStorage token
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && ADMIN_EMAILS.includes(session.user.email ?? "")) {
+        setToken(session.access_token);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session && ADMIN_EMAILS.includes(session.user.email ?? "")) {
+        setToken(session.access_token);
+      } else {
+        setToken(null);
+      }
+    });
     const storedTheme = localStorage.getItem("admin_theme");
     setDark(storedTheme === "dark");
+    return () => subscription.unsubscribe();
   }, []);
 
   function toggleDark() {
@@ -38,7 +54,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     });
   }
 
+  // Redirect non-admins away from protected pages
   if (!token && pathname !== "/admin") {
+    if (typeof window !== "undefined") router.replace("/admin");
     return (
       <AdminAuthContext.Provider value={{ token, setToken }}>
         <AdminThemeContext.Provider value={{ dark, toggleDark }}>
@@ -64,8 +82,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/nguoi-dung", icon: <Users className="w-5 h-5" />, label: t.admin.users },
   ];
 
-  function handleLogout() {
-    localStorage.removeItem("admin_token");
+  async function handleLogout() {
+    await supabase.auth.signOut();
     setToken(null);
     router.push("/admin");
   }
