@@ -1,13 +1,11 @@
 "use client";
 import Link from "next/link";
 import { Heart, Eye, MapPin, BedDouble, Bath, Maximize2 } from "lucide-react";
-import { useState, useEffect } from "react";
 import type { Property } from "@/lib/data";
 import { formatPrice } from "@/lib/data";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
-import { supabase } from "@/lib/supabase";
-import { useUser } from "@/lib/auth";
+import { useSaved } from "@/lib/savedContext";
 
 interface Props {
   property: Property;
@@ -17,38 +15,12 @@ interface Props {
 export default function PropertyCard({ property, viewMode = "grid" }: Props) {
   const { locale } = useLocale();
   const t = getT(locale);
-  const { user } = useUser();
-  const [saved, setSaved] = useState(false);
-  const [savePending, setSavePending] = useState(false);
-
-  // Check if already saved
-  useEffect(() => {
-    if (!user || !/^[0-9a-f-]{36}$/i.test(property.id)) return;
-    supabase
-      .from("saved_listings")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("listing_id", property.id)
-      .maybeSingle()
-      .then(({ data }) => { if (data) setSaved(true); });
-  }, [user, property.id]);
+  const { savedIds, toggle } = useSaved();
+  const saved = savedIds.has(property.id);
 
   async function toggleSave(e: React.MouseEvent) {
     e.preventDefault();
-    if (!user) {
-      window.location.href = "/dang-nhap?redirect=" + window.location.pathname;
-      return;
-    }
-    if (!/^[0-9a-f-]{36}$/i.test(property.id)) return;
-    setSavePending(true);
-    if (saved) {
-      await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", property.id);
-      setSaved(false);
-    } else {
-      await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: property.id });
-      setSaved(true);
-    }
-    setSavePending(false);
+    await toggle(property.id);
   }
 
   const title =
@@ -101,7 +73,7 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
             </div>
             <button
               onClick={toggleSave}
-              disabled={savePending}
+              disabled={false}
               className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors disabled:opacity-60"
             >
               <Heart className={`w-4 h-4 transition-colors ${saved ? "fill-red-500 text-red-500" : "text-gray-300"}`} />
@@ -137,7 +109,7 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
         {/* Save button */}
         <button
           onClick={toggleSave}
-          disabled={savePending}
+          disabled={false}
           className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow disabled:opacity-60"
         >
           <Heart className={`w-4 h-4 transition-colors ${saved ? "fill-red-500 text-red-500" : "text-gray-400"}`} />

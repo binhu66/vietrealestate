@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AgentWidget from "@/components/AgentWidget";
 import BottomNav from "@/components/layout/BottomNav";
+import { SavedProvider } from "@/lib/savedContext";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
@@ -49,11 +50,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" className="h-full">
       <body className="min-h-full flex flex-col bg-gray-50">
         <LocaleProvider>
-          <Header />
-          <main className="flex-1 pb-14 sm:pb-0">{children}</main>
-          <Footer />
-          <BottomNav />
-          <AgentWidget />
+          <SavedProvider>
+            <Header />
+            <main className="flex-1 pb-14 sm:pb-0">{children}</main>
+            <Footer />
+            <BottomNav />
+            <AgentWidget />
+          </SavedProvider>
         </LocaleProvider>
       </body>
     </html>
