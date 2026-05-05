@@ -7,7 +7,7 @@ import { properties } from "@/lib/data";
 import type { Property } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
-import { Loader2 } from "lucide-react";
+import { Loader2, LayoutGrid, List } from "lucide-react";
 
 function ChoThueContent() {
   const searchParams = useSearchParams();
@@ -18,10 +18,11 @@ function ChoThueContent() {
   const [listings, setListings] = useState<Property[]>(
     properties.filter(p => p.type === "thue")
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchListings() {
       setLoading(true);
       let query = supabase
         .from("listings")
@@ -32,30 +33,47 @@ function ChoThueContent() {
         .order("original_entry_timestamp", { ascending: false })
         .limit(120);
 
+      if (category) query = query.eq("category", category);
+      if (city)     query = query.eq("tinh_thanh", city);
+      if (q)        query = query.ilike("title", `%${q}%`);
+
       const { data, error } = await query;
       if (!error && data && data.length > 0)
         setListings((data as unknown as DbListing[]).map(dbToProperty));
+      else if (!error && data?.length === 0)
+        setListings([]);
       setLoading(false);
     }
-    fetch();
-  }, []);
+    fetchListings();
+  }, [q, category, city]);
 
+  // Client-side fallback filter for static data
   let filtered = listings;
-  if (category) filtered = filtered.filter(p => p.category === category);
-  if (city)     filtered = filtered.filter(p => p.city === city);
-  if (q) {
-    const lower = q.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.title.toLowerCase().includes(lower) || p.address.toLowerCase().includes(lower)
-    );
+  if (!loading && listings === properties.filter(p => p.type === "thue")) {
+    if (category) filtered = filtered.filter(p => p.category === category);
+    if (city)     filtered = filtered.filter(p => p.city === city);
+    if (q) {
+      const lower = q.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(lower) || p.address.toLowerCase().includes(lower)
+      );
+    }
   }
+
+  const SUB_CATS = [
+    { id: "can-ho-chung-cu", label: "Căn hộ",    icon: "🏢" },
+    { id: "nha-rieng",       label: "Nhà riêng",  icon: "🏠" },
+    { id: "van-phong",       label: "Văn phòng",  icon: "🏗️" },
+    { id: "mat-bang",        label: "Mặt bằng",   icon: "🏪" },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
         <SearchBar defaultTab="thue" />
       </div>
-      <div className="mb-4 flex items-center gap-3">
+
+      <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">🔑 Cho thuê bất động sản</h1>
           <p className="text-gray-500 mt-1 flex items-center gap-2">
@@ -65,29 +83,44 @@ function ChoThueContent() {
             }
           </p>
         </div>
+
+        {/* View mode toggle */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+            title="Dạng lưới"
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+            title="Dạng danh sách"
+          >
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Sub-category quick links */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {[
-          { id: "can-ho-chung-cu", label: "Căn hộ", icon: "🏢" },
-          { id: "nha-rieng",       label: "Nhà riêng", icon: "🏠" },
-          { id: "van-phong",       label: "Văn phòng", icon: "🏗️" },
-          { id: "mat-bang",        label: "Mặt bằng", icon: "🏪" },
-        ].map(cat => {
-          const cnt = listings.filter(p => p.category === cat.id).length;
-          return (
-            <a
-              key={cat.id}
-              href={`/cho-thue?category=${cat.id}`}
-              className={`flex items-center gap-2 px-4 py-2 bg-white border rounded-xl text-sm transition-colors hover:border-blue-400 hover:text-blue-700 ${category === cat.id ? "border-blue-500 text-blue-700 bg-blue-50" : "border-gray-200 text-gray-700"}`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-              {cnt > 0 && <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{cnt}</span>}
-            </a>
-          );
-        })}
+        <a
+          href="/cho-thue"
+          className={`flex items-center gap-2 px-4 py-2 bg-white border rounded-xl text-sm transition-colors hover:border-blue-400 hover:text-blue-700 ${!category ? "border-blue-500 text-blue-700 bg-blue-50" : "border-gray-200 text-gray-700"}`}
+        >
+          Tất cả
+        </a>
+        {SUB_CATS.map(cat => (
+          <a
+            key={cat.id}
+            href={`/cho-thue?category=${cat.id}`}
+            className={`flex items-center gap-2 px-4 py-2 bg-white border rounded-xl text-sm transition-colors hover:border-blue-400 hover:text-blue-700 ${category === cat.id ? "border-blue-500 text-blue-700 bg-blue-50" : "border-gray-200 text-gray-700"}`}
+          >
+            <span>{cat.icon}</span>
+            <span>{cat.label}</span>
+          </a>
+        ))}
       </div>
 
       {loading ? (
@@ -98,11 +131,15 @@ function ChoThueContent() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <div className="text-5xl mb-4">🔑</div>
-          <p>Không tìm thấy bất động sản cho thuê phù hợp</p>
+          <p className="font-medium">Không tìm thấy bất động sản cho thuê phù hợp</p>
+          <a href="/cho-thue" className="mt-3 inline-block text-blue-600 hover:underline text-sm">Xem tất cả cho thuê</a>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(p => <PropertyCard key={p.id} property={p} />)}
+        <div className={viewMode === "grid"
+          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+          : "space-y-3"
+        }>
+          {filtered.map(p => <PropertyCard key={p.id} property={p} viewMode={viewMode} />)}
         </div>
       )}
     </div>
