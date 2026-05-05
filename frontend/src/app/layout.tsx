@@ -4,6 +4,7 @@ import LocaleProvider from "@/components/layout/LocaleProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AgentWidget from "@/components/AgentWidget";
+import BottomNav from "@/components/layout/BottomNav";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
@@ -49,8 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col bg-gray-50">
         <LocaleProvider>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-14 sm:pb-0">{children}</main>
           <Footer />
+          <BottomNav />
           <AgentWidget />
         </LocaleProvider>
       </body>
