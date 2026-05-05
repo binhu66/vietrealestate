@@ -29,7 +29,14 @@ export default function PropertyDetailClient({
   const [savingToggle, setSavingToggle] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
 
-  // Load saved state from Supabase
+  // Load saved state from Supabase + increment view count
+  useEffect(() => {
+    // Increment views (fire-and-forget, UUID listings only)
+    if (/^[0-9a-f-]{36}$/.test(property.id)) {
+      supabase.rpc("increment_listing_views", { listing_id: property.id }).then(() => {});
+    }
+  }, [property.id]);
+
   useEffect(() => {
     if (!user) return;
     supabase
