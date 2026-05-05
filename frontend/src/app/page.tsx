@@ -190,6 +190,44 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Popular Districts — yhouse.ca style */}
+      <section className="max-w-7xl mx-auto px-4 pb-10">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              {locale === "zh" ? "🏙️ 热门区域" : locale === "en" ? "🏙️ Popular Districts" : "🏙️ Khu vực nổi bật"}
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {locale === "zh" ? "按区域找房" : locale === "en" ? "Browse by location" : "Tìm nhà theo quận huyện"}
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { name: "Quận 1", city: "TP.HCM", img: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&q=80", count: "2,400+" },
+            { name: "Quận 7", city: "TP.HCM", img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80", count: "1,800+" },
+            { name: "Bình Thạnh", city: "TP.HCM", img: "https://images.unsplash.com/photo-1612966809534-00e4ee54a3d6?w=400&q=80", count: "3,100+" },
+            { name: "Cầu Giấy", city: "Hà Nội", img: "https://images.unsplash.com/photo-1474314005122-3c07c96bff77?w=400&q=80", count: "1,500+" },
+            { name: "Hoàn Kiếm", city: "Hà Nội", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80", count: "980+" },
+            { name: "Ngũ Hành Sơn", city: "Đà Nẵng", img: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=400&q=80", count: "620+" },
+          ].map(d => (
+            <Link
+              key={d.name}
+              href={`/bat-dong-san?district=${encodeURIComponent(d.name)}`}
+              className="group relative overflow-hidden rounded-xl aspect-[3/4] block"
+            >
+              <img src={d.img} alt={d.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <div className="text-white font-bold text-sm leading-tight">{d.name}</div>
+                <div className="text-white/70 text-xs">{d.city}</div>
+                <div className="text-yellow-300 text-xs font-semibold mt-0.5">{d.count} tin</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Map CTA */}
       <section className="max-w-7xl mx-auto px-4 pb-10">
         <Link href="/ban-do" className="block bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white hover:shadow-xl transition-shadow overflow-hidden relative">

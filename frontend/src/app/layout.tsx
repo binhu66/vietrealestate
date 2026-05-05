@@ -4,6 +4,7 @@ import LocaleProvider from "@/components/layout/LocaleProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AgentWidget from "@/components/AgentWidget";
+import ZaloFloat from "@/components/ZaloFloat";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
           <AgentWidget />
+          <ZaloFloat />
         </LocaleProvider>
       </body>
     </html>
