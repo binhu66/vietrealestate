@@ -60,6 +60,13 @@ Each listing includes:
   - Example: `/api/listings?type=ban&city=TP. Hồ Chí Minh&limit=10`
   - Vietnamese full-text search: `/api/listings?q=nha dep quan 7` (unaccented input supported)
   - Returns: total, offset, limit, listings[]
+- **GET /api/news** — Real estate news articles. Parameters: category, q, limit, offset
+  - Categories: Thị trường | Pháp lý | Đầu tư | Thương mại | Kiến thức
+  - Example: `/api/news?category=Th%E1%BB%8B+tr%C6%B0%E1%BB%9Dng&limit=5`
+  - Returns: total, offset, limit, articles[]
+- **GET /api/stats** — Market price statistics. Parameters: type (city_avg|district_avg|category_avg|summary), city, category, tx
+  - Example: `/api/stats?type=city_avg` — average price per m² by city
+  - Example: `/api/stats?type=district_avg&city=TP. Hồ Chí Minh` — breakdown by district
 - **GET /api/openapi** — OpenAPI 3.1 spec describing all public API endpoints
 - **GET /sitemap.xml** — All active listing URLs for crawling
 - **GET /llms.txt** — This file
