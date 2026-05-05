@@ -149,6 +149,7 @@ const en: Translations = {
     loading: "Loading map...",
     sell: "Sale",
     rent: "Rent",
+    bedroomsAbbr: "BR",
   },
   post: {
     pageTitle: "Post a Property",

@@ -147,6 +147,7 @@ const vi = {
     loading: "Đang tải bản đồ...",
     sell: "Bán",
     rent: "Thuê",
+    bedroomsAbbr: "PN",
   },
   post: {
     pageTitle: "Đăng tin bất động sản",

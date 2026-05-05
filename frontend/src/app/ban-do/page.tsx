@@ -265,12 +265,12 @@ function MapContent() {
                     </span>
                     {p.isVip && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700">VIP</span>}
                   </div>
-                  <div className="text-red-600 font-bold text-sm leading-tight">{formatPrice(p.price, p.priceUnit)}</div>
+                  <div className="text-red-600 font-bold text-sm leading-tight">{formatPrice(p.price, p.priceUnit, locale)}</div>
                   <div className="text-gray-800 text-xs font-medium truncate group-hover:text-red-700 transition-colors">{p.title}</div>
                   <div className="text-gray-400 text-xs flex items-center gap-2 mt-0.5">
                     <span className="truncate">{p.district}</span>
                     {p.area && <span>· {p.area}m²</span>}
-                    {p.bedrooms && <span>· {p.bedrooms}PN</span>}
+                    {p.bedrooms && <span>· {p.bedrooms}{t.map.bedroomsAbbr}</span>}
                   </div>
                 </div>
               </Link>

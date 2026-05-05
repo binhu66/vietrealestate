@@ -149,6 +149,7 @@ const zh: Translations = {
     loading: "地图加载中...",
     sell: "出售",
     rent: "租",
+    bedroomsAbbr: "卧",
   },
   post: {
     pageTitle: "发布房源",
