@@ -191,8 +191,8 @@ export default function PropertyDetailClient({
           </div>
         </div>
 
-        {/* Right: Contact card */}
-        <div className="space-y-4">
+        {/* Right: Contact card — hidden on mobile (shown in sticky bottom bar instead) */}
+        <div className="hidden lg:block space-y-4">
           <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -259,13 +259,31 @@ export default function PropertyDetailClient({
 
       {/* Similar listings */}
       {similar.length > 0 && (
-        <section className="mt-10">
+        <section className="mt-10 mb-24 lg:mb-0">
           <h2 className="text-lg font-bold text-gray-800 mb-4">🏡 {t.property.similar}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {similar.map((p) => <PropertyCard key={p.id} property={p} />)}
           </div>
         </section>
       )}
+
+      {/* Mobile sticky contact bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 safe-bottom shadow-lg">
+        <button onClick={() => setShowPhone(true)}
+          className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm"
+        >
+          <Phone className="w-4 h-4" />
+          {showPhone ? property.contactPhone : t.property.showPhone}
+        </button>
+        <a
+          href={`https://zalo.me/${property.contactPhone?.replace(/^0/, "84")}`}
+          target="_blank" rel="noopener noreferrer"
+          className="flex-1 bg-[#0068FF] text-white font-bold py-3 rounded-xl hover:bg-[#0057d9] transition-colors flex items-center justify-center gap-2 text-sm"
+        >
+          <svg viewBox="0 0 48 48" className="w-4 h-4 fill-white"><path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm9.6 27.2c-.4.8-1.6 1.6-2.8 1.6-.4 0-.8 0-1.2-.4-2-1.2-4-2.8-5.6-4.8-1.6-2-2.8-4-3.6-6-.4-.8-.4-1.6 0-2.4.4-.8 1.2-1.2 2-1.2.4 0 .8.4.8.4l1.6 2.4c.4.4.4 1.2 0 1.6l-.8.8c.4.8.8 1.6 1.6 2.4.8.8 1.6 1.2 2.4 1.6l.8-.8c.4-.4 1.2-.4 1.6 0l2.4 1.6c.4.4.4.4.4.8.4.4 0 1.2-.4 2z"/></svg>
+          Zalo
+        </a>
+      </div>
     </div>
   );
 }
