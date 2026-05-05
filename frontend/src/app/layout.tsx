@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     title: "VietRealty - Bất động sản Việt Nam",
     description: "Sàn giao dịch bất động sản hàng đầu Việt Nam",
-    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+    images: [{ url: `${BASE_URL}/opengraph-image`, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
