@@ -109,21 +109,29 @@ function TinTucContent() {
   useEffect(() => {
     async function fetchNews() {
       setLoading(true);
-      let query = supabase
-        .from("news_articles")
-        .select("id, slug, title, excerpt, image_url, category, author, published_at, read_min, is_featured, source, source_url, views")
-        .eq("status", "published")
-        .order("is_featured", { ascending: false })
-        .order("published_at", { ascending: false })
-        .limit(50);
+      try {
+        let query = supabase
+          .from("news_articles")
+          .select("id, slug, title, excerpt, image_url, category, author, published_at, read_min, is_featured, source, source_url, views")
+          .eq("status", "published")
+          .order("is_featured", { ascending: false })
+          .order("published_at", { ascending: false })
+          .limit(50);
 
-      if (activeCategory) query = query.eq("category", activeCategory);
+        if (activeCategory) query = query.eq("category", activeCategory);
 
-      const { data } = await query;
-      if (data && data.length > 0) {
-        setArticles(data.map(dbToArticle));
+        const { data } = await query;
+        if (data && data.length > 0) {
+          setArticles(data.map(dbToArticle));
+        } else if (!activeCategory) {
+          // DB empty or error — show static articles
+          setArticles(staticArticles as unknown as Article[]);
+        }
+      } catch {
+        // Network/Supabase error — keep static articles visible
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchNews();
   }, [activeCategory]);

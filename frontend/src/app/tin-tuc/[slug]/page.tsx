@@ -4,6 +4,8 @@ import { articles } from "@/lib/articles";
 import { createClient } from "@supabase/supabase-js";
 import ArticleContent from "./ArticleContent";
 
+export const runtime = "edge";
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
 function getSupabase() {
