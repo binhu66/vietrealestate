@@ -104,7 +104,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             {locale === "zh" ? "🏠 民用住宅" : locale === "en" ? "🏠 Residential" : "🏠 Nhà ở dân dụng"}
           </p>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {categories.filter(c => ["can-ho-chung-cu","nha-rieng","nha-biet-thu","dat-nen"].includes(c.id)).map(cat => (
               <Link
                 key={cat.id}
@@ -125,7 +125,7 @@ export default function HomePage() {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             {locale === "zh" ? "🏢 商业地产" : locale === "en" ? "🏢 Commercial" : "🏢 Bất động sản thương mại"}
           </p>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {categories.filter(c => ["van-phong","mat-bang","kho-xuong","khach-san"].includes(c.id)).map(cat => (
               <Link
                 key={cat.id}

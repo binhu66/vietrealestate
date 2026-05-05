@@ -63,6 +63,7 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-3">Khám phá</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/ban-do"    className="hover:text-red-400 transition-colors">Tìm trên bản đồ</Link></li>
+              <li><Link href="/tai-chinh" className="hover:text-red-400 transition-colors">💰 Tính vay & lợi suất</Link></li>
               <li><Link href="/moi-gioi" className="hover:text-red-400 transition-colors">Môi giới uy tín</Link></li>
               <li><Link href="/tin-tuc"  className="hover:text-red-400 transition-colors">Tin tức thị trường</Link></li>
             </ul>
@@ -79,10 +80,10 @@ export default function Footer() {
             </Link>
             <h4 className="text-white font-semibold mb-3">Về chúng tôi</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
-              <li><Link href="#" className="hover:text-red-400 transition-colors">{t.footer.contact}</Link></li>
-              <li><Link href="#" className="hover:text-red-400 transition-colors">{t.footer.terms}</Link></li>
-              <li><Link href="#" className="hover:text-red-400 transition-colors">{t.footer.privacy}</Link></li>
+              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
+              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.contact}</Link></li>
+              <li><Link href="#"                    className="hover:text-red-400 transition-colors">{t.footer.terms}</Link></li>
+              <li><Link href="/chinh-sach-bao-mat"  className="hover:text-red-400 transition-colors">{t.footer.privacy}</Link></li>
             </ul>
             <div className="mt-4 p-3 bg-gray-800 rounded-lg">
               <p className="text-xs text-gray-400">Chứng nhận ĐKKD: 0316012345</p>
