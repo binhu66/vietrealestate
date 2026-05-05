@@ -6,8 +6,7 @@ import { LayoutDashboard, Building2, Users, LogOut, Menu, X, Sun, Moon } from "l
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
 import { supabase } from "@/lib/supabase";
-
-const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+import { ADMIN_EMAILS } from "@/lib/config";
 
 // Keep context for backwards compat with admin/page.tsx
 type AuthCtx = { token: string | null; setToken: (t: string | null) => void };

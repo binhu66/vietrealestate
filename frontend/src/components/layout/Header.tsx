@@ -6,6 +6,7 @@ import { Menu, X, Globe, ChevronDown, LogOut, User } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
 import { useUser, signOut } from "@/lib/auth";
+import { ADMIN_EMAILS } from "@/lib/config";
 
 export default function Header() {
   const { locale, setLocale } = useLocale();
@@ -40,7 +41,6 @@ export default function Header() {
     router.refresh();
   }
 
-  const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
   const isAdmin = user && ADMIN_EMAILS.includes(user.email ?? "");
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Tài khoản";
 
