@@ -8,8 +8,12 @@ import type { Property } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
 import { Loader2, LayoutGrid, List } from "lucide-react";
+import { useLocale } from "@/lib/locale";
+import { getT } from "@/i18n";
 
 function ChoThueContent() {
+  const { locale } = useLocale();
+  const t = getT(locale);
   const searchParams = useSearchParams();
   const q        = searchParams.get("q") || "";
   const category = searchParams.get("category") || "";
@@ -61,10 +65,10 @@ function ChoThueContent() {
   }
 
   const SUB_CATS = [
-    { id: "can-ho-chung-cu", label: "Căn hộ",    icon: "🏢" },
-    { id: "nha-rieng",       label: "Nhà riêng",  icon: "🏠" },
-    { id: "van-phong",       label: "Văn phòng",  icon: "🏗️" },
-    { id: "mat-bang",        label: "Mặt bằng",   icon: "🏪" },
+    { id: "can-ho-chung-cu", label: t.rentPage.apartment, icon: "🏢" },
+    { id: "nha-rieng",       label: t.rentPage.house,     icon: "🏠" },
+    { id: "van-phong",       label: t.rentPage.office,    icon: "🏗️" },
+    { id: "mat-bang",        label: t.rentPage.retail,    icon: "🏪" },
   ];
 
   return (
@@ -75,11 +79,11 @@ function ChoThueContent() {
 
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">🔑 Cho thuê bất động sản</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.rentPage.heading}</h1>
           <p className="text-gray-500 mt-1 flex items-center gap-2">
             {loading
-              ? <><Loader2 className="w-3 h-3 animate-spin" /> Đang tải...</>
-              : <><strong className="text-gray-800">{filtered.length}</strong> tin đăng phù hợp</>
+              ? <><Loader2 className="w-3 h-3 animate-spin" /> {t.rentPage.loading}</>
+              : <><strong className="text-gray-800">{filtered.length}</strong> {t.rentPage.matchingListings}</>
             }
           </p>
         </div>
@@ -89,14 +93,14 @@ function ChoThueContent() {
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
-            title="Dạng lưới"
+            title={t.rentPage.gridView}
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
-            title="Dạng danh sách"
+            title={t.rentPage.listView}
           >
             <List className="w-4 h-4" />
           </button>
@@ -109,7 +113,7 @@ function ChoThueContent() {
           href="/cho-thue"
           className={`flex items-center gap-2 px-4 py-2 bg-white border rounded-xl text-sm transition-colors hover:border-blue-400 hover:text-blue-700 ${!category ? "border-blue-500 text-blue-700 bg-blue-50" : "border-gray-200 text-gray-700"}`}
         >
-          Tất cả
+          {t.rentPage.all}
         </a>
         {SUB_CATS.map(cat => (
           <a
@@ -126,13 +130,13 @@ function ChoThueContent() {
       {loading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <Loader2 className="w-7 h-7 animate-spin mr-3" />
-          <span>Đang tải tin cho thuê...</span>
+          <span>{t.rentPage.loadingListings}</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <div className="text-5xl mb-4">🔑</div>
-          <p className="font-medium">Không tìm thấy bất động sản cho thuê phù hợp</p>
-          <a href="/cho-thue" className="mt-3 inline-block text-blue-600 hover:underline text-sm">Xem tất cả cho thuê</a>
+          <p className="font-medium">{t.rentPage.noResults}</p>
+          <a href="/cho-thue" className="mt-3 inline-block text-blue-600 hover:underline text-sm">{t.rentPage.viewAllRent}</a>
         </div>
       ) : (
         <div className={viewMode === "grid"
