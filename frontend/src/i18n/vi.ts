@@ -129,6 +129,13 @@ const vi = {
     copyright: "© 2026 VietRealEstate. All rights reserved.",
     desc: "Sàn giao dịch bất động sản hàng đầu Việt Nam",
   },
+  home: {
+    forSaleTitle: "🏠 Mua bán bất động sản",
+    forSaleSub: "Tin đăng mới nhất hôm nay",
+    forRentTitle: "🔑 Cho thuê bất động sản",
+    forRentSub: "Căn hộ, nhà phố, văn phòng cho thuê",
+    viewAll: "Xem tất cả",
+  },
   map: {
     title: "Tìm kiếm theo bản đồ",
     subtitle: "Xem các bất động sản trực tiếp trên bản đồ",

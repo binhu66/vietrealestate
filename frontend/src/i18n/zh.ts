@@ -131,6 +131,13 @@ const zh: Translations = {
     copyright: "© 2026 VietRealEstate. 保留所有权利。",
     desc: "越南领先的房产交易平台",
   },
+  home: {
+    forSaleTitle: "🏠 出售房源",
+    forSaleSub: "今日最新房源",
+    forRentTitle: "🔑 租赁房源",
+    forRentSub: "公寓、联排别墅、办公室出租",
+    viewAll: "查看全部",
+  },
   map: {
     title: "地图找房",
     subtitle: "在地图上直接查看房源位置",

@@ -131,6 +131,13 @@ const en: Translations = {
     copyright: "© 2026 VietRealEstate. All rights reserved.",
     desc: "Vietnam's leading real estate marketplace",
   },
+  home: {
+    forSaleTitle: "🏠 Properties for Sale",
+    forSaleSub: "Latest listings today",
+    forRentTitle: "🔑 Properties for Rent",
+    forRentSub: "Apartments, townhouses, offices for rent",
+    viewAll: "View all",
+  },
   map: {
     title: "Search by Map",
     subtitle: "View properties directly on the map",
