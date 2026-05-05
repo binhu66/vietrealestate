@@ -100,7 +100,16 @@ export default function PropertyCard({ property }: Props) {
           <span className="text-red-600 font-bold text-lg leading-tight">
             {formatPrice(property.price, property.priceUnit)}
           </span>
-          <span className="text-gray-500 text-xs">{property.area} m²</span>
+          <div className="text-right">
+            <div className="text-gray-500 text-xs">{property.area} m²</div>
+            {property.area > 0 && (property.priceUnit === "ty" || property.priceUnit === "trieu") && (
+              <div className="text-gray-400 text-[10px]">
+                {property.priceUnit === "ty"
+                  ? `${((property.price * 1000) / property.area).toFixed(0)}tr/m²`
+                  : `${(property.price / property.area).toFixed(0)}tr/m²`}
+              </div>
+            )}
+          </div>
         </div>
 
         <Link href={`/bat-dong-san/${property.id}`}>
