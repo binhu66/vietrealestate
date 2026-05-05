@@ -15,10 +15,6 @@ function getSupabase() {
   );
 }
 
-export async function generateStaticParams() {
-  // Only pre-render manually written articles
-  return articles.map(a => ({ slug: a.slug }));
-}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
