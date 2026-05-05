@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Home, ChevronRight, CheckCircle2, MapPin, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Building2, Home, ChevronRight, CheckCircle2, MapPin, Loader2, LogIn } from "lucide-react";
 import { cities, categories } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
+import { useUser } from "@/lib/auth";
 
 const RESIDENTIAL_IDS = ["can-ho-chung-cu", "nha-rieng", "nha-biet-thu", "dat-nen"];
 const COMMERCIAL_IDS  = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
@@ -37,6 +39,7 @@ export default function DangTinPage() {
   const { locale } = useLocale();
   const t = getT(locale).post;
   const tCat = getT(locale).categories;
+  const { user, loading: authLoading } = useUser();
 
   const [step,       setStep]       = useState<Step>("type");
   const [segment,    setSegment]    = useState<"residential" | "commercial">("residential");
@@ -198,6 +201,27 @@ export default function DangTinPage() {
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-500 transition-colors" />
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Auth gate ────────────────────────────────────────────────────────────
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">🔐</div>
+          <h2 className="text-xl font-black text-gray-900 mb-2">Đăng nhập để đăng tin</h2>
+          <p className="text-gray-500 text-sm mb-6">Bạn cần có tài khoản để đăng bất động sản lên VietRealty.</p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/dang-nhap?redirect=/dang-tin" className="flex items-center gap-2 bg-red-600 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-red-700 transition-colors">
+              <LogIn className="w-4 h-4" /> Đăng nhập
+            </Link>
+            <Link href="/dang-ky?redirect=/dang-tin" className="flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold px-5 py-2.5 rounded-xl hover:border-red-400 hover:text-red-600 transition-colors">
+              Đăng ký
+            </Link>
+          </div>
         </div>
       </div>
     );

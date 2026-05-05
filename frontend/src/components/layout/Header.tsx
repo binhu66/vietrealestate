@@ -1,45 +1,58 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Search, Menu, X, Globe, Bell, User, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Globe, ChevronDown, LogOut, User } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
+import { useUser, signOut } from "@/lib/auth";
 
 export default function Header() {
   const { locale, setLocale } = useLocale();
   const t = getT(locale);
+  const router = useRouter();
+  const { user, loading: authLoading } = useUser();
+
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
+  const [langOpen, setLangOpen]     = useState(false);
+  const [userOpen, setUserOpen]     = useState(false);
 
   const langs: { code: Locale; label: string; flag: string }[] = [
     { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
-    { code: "en", label: "English", flag: "🇺🇸" },
-    { code: "zh", label: "中文", flag: "🇨🇳" },
+    { code: "en", label: "English",    flag: "🇺🇸" },
+    { code: "zh", label: "中文",        flag: "🇨🇳" },
   ];
 
   const navLinks = [
     { href: "/bat-dong-san", label: t.nav.mua },
-    { href: "/cho-thue", label: t.nav.thue },
-    { href: "/thuong-mai", label: t.nav.thuongMai },
-    { href: "/ban-do", label: t.nav.banDo },
-    { href: "/tin-tuc", label: t.nav.tinTuc },
+    { href: "/cho-thue",     label: t.nav.thue },
+    { href: "/thuong-mai",   label: t.nav.thuongMai },
+    { href: "/ban-do",       label: t.nav.banDo },
+    { href: "/tin-tuc",      label: t.nav.tinTuc },
   ];
+
+  async function handleSignOut() {
+    setUserOpen(false);
+    await signOut();
+    router.push("/");
+    router.refresh();
+  }
+
+  const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Tài khoản";
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       {/* Top bar */}
       <div className="bg-red-600 text-white text-xs py-1 px-4 flex justify-between items-center">
-        <span>📞 Hotline: 1800 6834 | 08:00 - 21:00 mỗi ngày</span>
+        <span>📞 Hotline: 1800 6834 | 08:00 - 21:00</span>
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="hover:text-yellow-300 transition-colors">
-            {t.nav.admin}
-          </Link>
-          <Link href="#" className="hover:text-yellow-300 transition-colors">
-            {t.nav.dangnhap}
-          </Link>
-          <Link href="#" className="hover:text-yellow-300 transition-colors">
-            {t.nav.dangky}
-          </Link>
+          <Link href="/admin" className="hover:text-yellow-300 transition-colors">{t.nav.admin}</Link>
+          {!authLoading && !user && (
+            <>
+              <Link href="/dang-nhap" className="hover:text-yellow-300 transition-colors">{t.nav.dangnhap}</Link>
+              <Link href="/dang-ky"   className="hover:text-yellow-300 transition-colors">{t.nav.dangky}</Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -74,7 +87,7 @@ export default function Header() {
           {/* Lang switcher */}
           <div className="relative">
             <button
-              onClick={() => setLangOpen(!langOpen)}
+              onClick={() => { setLangOpen(!langOpen); setUserOpen(false); }}
               className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md"
             >
               <Globe className="w-4 h-4" />
@@ -89,8 +102,7 @@ export default function Header() {
                     onClick={() => { setLocale(l.code); setLangOpen(false); }}
                     className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${locale === l.code ? "text-red-600 font-semibold" : "text-gray-700"}`}
                   >
-                    <span>{l.flag}</span>
-                    <span>{l.label}</span>
+                    <span>{l.flag}</span><span>{l.label}</span>
                     {locale === l.code && <span className="ml-auto text-red-600">✓</span>}
                   </button>
                 ))}
@@ -98,12 +110,56 @@ export default function Header() {
             )}
           </div>
 
-          <Link
-            href="/dang-tin"
-            className="hidden sm:flex items-center gap-1 bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            + {t.nav.dangTin}
-          </Link>
+          {/* User menu */}
+          {!authLoading && user ? (
+            <div className="relative">
+              <button
+                onClick={() => { setUserOpen(!userOpen); setLangOpen(false); }}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200"
+              >
+                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {displayName[0]?.toUpperCase()}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate">{displayName}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {userOpen && (
+                <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-52 z-50">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <div className="text-xs font-semibold text-gray-800 truncate">{displayName}</div>
+                    <div className="text-xs text-gray-400 truncate">{user.email}</div>
+                  </div>
+                  <Link
+                    href="/tai-khoan"
+                    onClick={() => setUserOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <User className="w-4 h-4" /> Tài khoản của tôi
+                  </Link>
+                  <Link
+                    href="/dang-tin"
+                    onClick={() => setUserOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    + Đăng tin
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" /> Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/dang-tin"
+              className="hidden sm:flex items-center gap-1 bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              + {t.nav.dangTin}
+            </Link>
+          )}
 
           <button
             className="md:hidden p-2 rounded-md hover:bg-gray-100"
@@ -127,13 +183,25 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/dang-tin"
-            className="block mt-2 text-center bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-700"
-            onClick={() => setMobileOpen(false)}
-          >
-            + {t.nav.dangTin}
-          </Link>
+          {user ? (
+            <>
+              <Link href="/tai-khoan" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                👤 Tài khoản của tôi
+              </Link>
+              <button onClick={() => { setMobileOpen(false); handleSignOut(); }} className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/dang-nhap" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                Đăng nhập
+              </Link>
+              <Link href="/dang-tin" onClick={() => setMobileOpen(false)} className="block mt-2 text-center bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-700">
+                + {t.nav.dangTin}
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>

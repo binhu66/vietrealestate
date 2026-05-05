@@ -212,9 +212,15 @@ export default function PropertyDetailClient({
               <Phone className="w-5 h-5" />
               {showPhone ? property.contactPhone : t.property.showPhone}
             </button>
-            <button className="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mb-3">
-              💬 Nhắn tin Zalo
-            </button>
+            <a
+              href={`https://zalo.me/${property.contactPhone?.replace(/^0/, "84")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-[#0068FF] text-white font-bold py-3 rounded-xl hover:bg-[#0057d9] transition-colors flex items-center justify-center gap-2 mb-3"
+            >
+              <svg viewBox="0 0 48 48" className="w-5 h-5 fill-white"><path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm9.6 27.2c-.4.8-1.6 1.6-2.8 1.6-.4 0-.8 0-1.2-.4-2-1.2-4-2.8-5.6-4.8-1.6-2-2.8-4-3.6-6-.4-.8-.4-1.6 0-2.4.4-.8 1.2-1.2 2-1.2.4 0 .8.4.8.4l1.6 2.4c.4.4.4 1.2 0 1.6l-.8.8c.4.8.8 1.6 1.6 2.4.8.8 1.6 1.2 2.4 1.6l.8-.8c.4-.4 1.2-.4 1.6 0l2.4 1.6c.4.4.4.4.4.8.4.4 0 1.2-.4 2z"/></svg>
+              Chat Zalo
+            </a>
             <div className="text-xs text-gray-500 space-y-2 border-t border-gray-100 pt-3">
               <div className="flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5" />
