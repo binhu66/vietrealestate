@@ -1,13 +1,17 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { X, Phone, MessageCircle, ChevronDown } from "lucide-react";
 
 export default function AgentWidget() {
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const pathname = usePathname();
 
-  if (dismissed) return null;
+  // Hide on property detail pages — those have their own sticky contact bar
+  const isDetailPage = /^\/bat-dong-san\/.+/.test(pathname);
+  if (dismissed || isDetailPage) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">

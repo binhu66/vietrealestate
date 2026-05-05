@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MapPin, BedDouble, Bath, Maximize2, Eye, Calendar,
   Phone, Share2, Heart, ChevronLeft, ChevronRight,
@@ -11,6 +11,8 @@ import type { Property } from "@/lib/data";
 import PropertyCard from "@/components/property/PropertyCard";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
+import { supabase } from "@/lib/supabase";
+import { useUser } from "@/lib/auth";
 
 export default function PropertyDetailClient({
   property,
@@ -21,9 +23,44 @@ export default function PropertyDetailClient({
 }) {
   const { locale } = useLocale();
   const t = getT(locale);
+  const { user } = useUser();
   const [imgIdx, setImgIdx] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [savingToggle, setSavingToggle] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+
+  // Load saved state from Supabase
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("saved_listings")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("listing_id", property.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setSaved(true); });
+  }, [user, property.id]);
+
+  async function toggleSave() {
+    if (!user) { window.location.href = "/dang-nhap?redirect=" + encodeURIComponent(window.location.pathname); return; }
+    setSavingToggle(true);
+    if (saved) {
+      await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", property.id);
+      setSaved(false);
+    } else {
+      await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: property.id });
+      setSaved(true);
+    }
+    setSavingToggle(false);
+  }
+
+  function handleShare() {
+    if (navigator.share) {
+      navigator.share({ title: property.title, url: window.location.href }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+    }
+  }
 
   const title =
     locale === "en" && property.titleEn ? property.titleEn
@@ -110,12 +147,18 @@ export default function PropertyDetailClient({
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
-                  onClick={() => setSaved(!saved)}
-                  className={`p-2 rounded-lg border transition-colors ${saved ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
+                  onClick={toggleSave}
+                  disabled={savingToggle}
+                  className={`p-2 rounded-lg border transition-colors disabled:opacity-50 ${saved ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
+                  title={saved ? "Bỏ lưu" : "Lưu tin"}
                 >
                   <Heart className={`w-5 h-5 ${saved ? "fill-red-500" : ""}`} />
                 </button>
-                <button className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">
+                <button
+                  onClick={handleShare}
+                  className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50"
+                  title="Chia sẻ"
+                >
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>

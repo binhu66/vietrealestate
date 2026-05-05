@@ -1,13 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Building2, Home, ChevronRight, CheckCircle2, MapPin, Loader2, LogIn } from "lucide-react";
+import { Building2, Home, ChevronRight, CheckCircle2, MapPin, Loader2, LogIn, ImagePlus, X } from "lucide-react";
 import { cities, categories } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { useUser } from "@/lib/auth";
+
+const MAX_PHOTOS = 10;
+const MAX_SIZE_MB = 10;
+
+interface PhotoPreview {
+  file: File;
+  url: string;  // object URL for preview
+}
 
 const RESIDENTIAL_IDS = ["can-ho-chung-cu", "nha-rieng", "nha-biet-thu", "dat-nen"];
 const COMMERCIAL_IDS  = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
@@ -41,11 +49,15 @@ export default function DangTinPage() {
   const tCat = getT(locale).categories;
   const { user, loading: authLoading } = useUser();
 
-  const [step,       setStep]       = useState<Step>("type");
-  const [segment,    setSegment]    = useState<"residential" | "commercial">("residential");
-  const [submitting, setSubmitting] = useState(false);
-  const [error,      setError]      = useState("");
-  const [savedId,    setSavedId]    = useState<string | null>(null);
+  const [step,         setStep]         = useState<Step>("type");
+  const [segment,      setSegment]      = useState<"residential" | "commercial">("residential");
+  const [submitting,   setSubmitting]   = useState(false);
+  const [error,        setError]        = useState("");
+  const [savedId,      setSavedId]      = useState<string | null>(null);
+  const [photos,       setPhotos]       = useState<PhotoPreview[]>([]);
+  const [dragOver,     setDragOver]     = useState(false);
+  const [photoError,   setPhotoError]   = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     listingType:  "ban",
@@ -75,6 +87,38 @@ export default function DangTinPage() {
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
+  const addFiles = useCallback((files: FileList | null) => {
+    if (!files) return;
+    setPhotoError("");
+    const valid: PhotoPreview[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        setPhotoError(`${file.name} vượt quá ${MAX_SIZE_MB}MB`);
+        continue;
+      }
+      if (photos.length + valid.length >= MAX_PHOTOS) break;
+      valid.push({ file, url: URL.createObjectURL(file) });
+    }
+    setPhotos(prev => [...prev, ...valid].slice(0, MAX_PHOTOS));
+  }, [photos.length]);
+
+  function removePhoto(idx: number) {
+    setPhotos(prev => {
+      URL.revokeObjectURL(prev[idx].url);
+      return prev.filter((_, i) => i !== idx);
+    });
+  }
+
+  function movePhoto(from: number, to: number) {
+    setPhotos(prev => {
+      const arr = [...prev];
+      const [item] = arr.splice(from, 1);
+      arr.splice(to, 0, item);
+      return arr;
+    });
+  }
+
   function handleSegment(s: "residential" | "commercial") {
     setSegment(s);
     setForm(prev => ({ ...prev, category: "", listingType: "ban" }));
@@ -100,6 +144,22 @@ export default function DangTinPage() {
         } catch { /* geocoding optional */ }
       }
 
+      // Upload photos first to get cover_image URL
+      const uploadedUrls: Array<{ url: string; path: string; size: number }> = [];
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        const ext = photo.file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const path = `${user?.id ?? "anon"}/${Date.now()}_${i}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("listing-images")
+          .upload(path, photo.file, { contentType: photo.file.type, upsert: false });
+        if (upErr) { console.warn("Photo upload failed:", upErr.message); continue; }
+        const { data: { publicUrl } } = supabase.storage.from("listing-images").getPublicUrl(path);
+        uploadedUrls.push({ url: publicUrl, path, size: photo.file.size });
+      }
+
+      const coverImage = uploadedUrls[0]?.url ?? null;
+
       const { data, error: dbError } = await supabase
         .from("listings")
         .insert({
@@ -120,6 +180,7 @@ export default function DangTinPage() {
           contact_name:        form.contactName,
           contact_phone:       form.contactPhone,
           lat, lng,
+          cover_image:         coverImage,
           standard_status:     "Active",
           posted_by:           user?.id ?? null,
         })
@@ -127,7 +188,24 @@ export default function DangTinPage() {
         .single();
 
       if (dbError) throw new Error(dbError.message);
-      setSavedId(data?.id ?? null);
+      const listingId = data?.id;
+
+      // Insert listing_media rows
+      if (listingId && uploadedUrls.length > 0) {
+        await supabase.from("listing_media").insert(
+          uploadedUrls.map((u, idx) => ({
+            listing_id:   listingId,
+            url:          u.url,
+            storage_path: u.path,
+            media_type:   "photo",
+            sort_order:   idx,
+            size_bytes:   u.size,
+            uploaded_by:  user?.id ?? null,
+          }))
+        );
+      }
+
+      setSavedId(listingId ?? null);
       setStep("done");
     } catch (err: any) {
       setError(err.message ?? "Error, please try again.");
@@ -154,6 +232,8 @@ export default function DangTinPage() {
             <button
               onClick={() => {
                 setStep("type"); setSavedId(null);
+                photos.forEach(p => URL.revokeObjectURL(p.url));
+                setPhotos([]);
                 setForm({ listingType:"ban", category:"", title:"", price:"", priceUnit:"ty", area:"", bedrooms:"", bathrooms:"", address:"", district:"", city:"", description:"", contactName:"", contactPhone:"" });
               }}
               className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
@@ -388,6 +468,72 @@ export default function DangTinPage() {
             placeholder={t.descPlaceholder}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
           />
+        </div>
+
+        {/* Photos */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">{t.photos}</label>
+          <p className="text-xs text-gray-400 mb-3">{t.photosHint}</p>
+
+          {/* Drop zone */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
+            className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${dragOver ? "border-red-400 bg-red-50" : "border-gray-200 hover:border-red-300 hover:bg-gray-50"} ${photos.length >= MAX_PHOTOS ? "opacity-50 pointer-events-none" : ""}`}
+          >
+            <ImagePlus className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">{t.photosAdd}</p>
+            <p className="text-xs text-gray-400 mt-1">{t.photosFormat} · {photos.length}/{MAX_PHOTOS}</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={e => addFiles(e.target.files)}
+            />
+          </div>
+
+          {photoError && <p className="text-xs text-red-500 mt-1.5">{photoError}</p>}
+
+          {/* Preview grid */}
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-3">
+              {photos.map((p, idx) => (
+                <div key={p.url} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
+                  <img src={p.url} alt="" className="w-full h-full object-cover" />
+                  {idx === 0 && (
+                    <span className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-[9px] text-center py-0.5 font-semibold">Bìa</span>
+                  )}
+                  {/* Move left */}
+                  {idx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => movePhoto(idx, idx - 1)}
+                      className="absolute left-0.5 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >‹</button>
+                  )}
+                  {/* Move right */}
+                  {idx < photos.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => movePhoto(idx, idx + 1)}
+                      className="absolute right-0.5 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >›</button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(idx)}
+                    className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Contact */}
