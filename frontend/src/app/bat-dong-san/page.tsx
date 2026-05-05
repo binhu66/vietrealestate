@@ -278,7 +278,7 @@ function ListingsContent() {
           ) : (
             <>
               <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-4"}>
-                {filtered.map(p => <PropertyCard key={p.id} property={p} />)}
+                {filtered.map(p => <PropertyCard key={p.id} property={p} viewMode={viewMode} />)}
               </div>
 
               {/* Load more */}

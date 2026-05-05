@@ -40,6 +40,8 @@ export default function Header() {
     router.refresh();
   }
 
+  const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email ?? "");
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Tài khoản";
 
   return (
@@ -48,7 +50,7 @@ export default function Header() {
       <div className="bg-red-600 text-white text-xs py-1 px-4 flex justify-between items-center">
         <span>📞 Hotline: 1800 6834 | 08:00 - 21:00</span>
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="hover:text-yellow-300 transition-colors">{t.nav.admin}</Link>
+          {isAdmin && <Link href="/admin" className="hover:text-yellow-300 transition-colors">{t.nav.admin}</Link>}
           {!authLoading && !user && (
             <>
               <Link href="/dang-nhap" className="hover:text-yellow-300 transition-colors">{t.nav.dangnhap}</Link>
@@ -145,6 +147,15 @@ export default function Header() {
                   >
                     + Đăng tin
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setUserOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-100"
+                    >
+                      🛡️ Quản trị
+                    </Link>
+                  )}
                   <button
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
