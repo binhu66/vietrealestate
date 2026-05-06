@@ -160,13 +160,13 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
           {property.bedrooms && (
             <span className="flex items-center gap-1">
               <BedDouble className="w-3 h-3" />
-              {property.bedrooms} PN
+              {property.bedrooms} {t.map.bedroomsAbbr}
             </span>
           )}
           {property.bathrooms && (
             <span className="flex items-center gap-1">
               <Bath className="w-3 h-3" />
-              {property.bathrooms} WC
+              {property.bathrooms} {locale === "zh" ? "卫" : locale === "en" ? "BA" : "WC"}
             </span>
           )}
           <span className="flex items-center gap-1">
