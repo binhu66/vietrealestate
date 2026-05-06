@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#DC2626" rx="180"/>
+  <text x="512" y="650" text-anchor="middle"
+        font-family="Inter, -apple-system, system-ui, Helvetica, sans-serif"
+        font-weight="900" font-size="500" fill="#FFFFFF" letter-spacing="-20">VR</text>
+</svg>

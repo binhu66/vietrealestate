@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732">
+  <rect width="2732" height="2732" fill="#DC2626"/>
+  <g transform="translate(1366,1366)">
+    <rect x="-360" y="-360" width="720" height="720" rx="140" fill="#FFFFFF"/>
+    <text x="0" y="120" text-anchor="middle"
+          font-family="Inter, -apple-system, system-ui, Helvetica, sans-serif"
+          font-weight="900" font-size="380" fill="#DC2626" letter-spacing="-12">VR</text>
+    <text x="0" y="280" text-anchor="middle"
+          font-family="Inter, -apple-system, system-ui, Helvetica, sans-serif"
+          font-weight="700" font-size="92" fill="#DC2626" letter-spacing="6">VietRealty</text>
+  </g>
+</svg>
