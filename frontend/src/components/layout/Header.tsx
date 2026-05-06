@@ -69,7 +69,7 @@ export default function Header() {
           </div>
           <div className="leading-none">
             <div className="font-black text-red-600 text-lg tracking-tight">VietRealty</div>
-            <div className="text-gray-400 text-[10px] leading-tight">Bất động sản</div>
+            <div className="text-gray-400 text-[10px] leading-tight">{locale === "zh" ? "房产" : locale === "en" ? "Real Estate" : "Bất động sản"}</div>
           </div>
         </Link>
 

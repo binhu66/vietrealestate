@@ -133,9 +133,13 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
             <div className="text-gray-500 text-xs">{property.area} m²</div>
             {property.area > 0 && (property.priceUnit === "ty" || property.priceUnit === "trieu") && (
               <div className="text-gray-400 text-[10px]">
-                {property.priceUnit === "ty"
-                  ? `${((property.price * 1000) / property.area).toFixed(0)}tr/m²`
-                  : `${(property.price / property.area).toFixed(0)}tr/m²`}
+                {(() => {
+                  const perSqm = property.priceUnit === "ty"
+                    ? (property.price * 1000) / property.area
+                    : property.price / property.area;
+                  const suffix = locale === "zh" ? "百万/m²" : locale === "en" ? "M/m²" : "tr/m²";
+                  return `${perSqm.toFixed(0)}${suffix}`;
+                })()}
               </div>
             )}
           </div>
