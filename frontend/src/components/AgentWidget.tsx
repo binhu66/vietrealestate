@@ -3,11 +3,20 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { X, Phone, MessageCircle, ChevronDown } from "lucide-react";
+import { useLocale } from "@/lib/locale";
+
+const AGENT_T = {
+  vi: { title: "Tư vấn bất động sản", greeting: "Xin chào! Bạn cần tư vấn về bất động sản? Tôi sẵn sàng hỗ trợ bạn tìm căn nhà phù hợp nhất 🏠", agent: "Tư vấn viên", needHelp: "Cần tư vấn?", chatWithUs: "Chat với chúng tôi" },
+  en: { title: "Real Estate Advisor", greeting: "Hi! Need help with real estate? I'm here to help you find the perfect home 🏠", agent: "Agent", needHelp: "Need advice?", chatWithUs: "Chat with us" },
+  zh: { title: "房产顾问", greeting: "您好！需要房产咨询吗？我会帮您找到最合适的房源 🏠", agent: "顾问", needHelp: "需要咨询？", chatWithUs: "与我们聊聊" },
+};
 
 export default function AgentWidget() {
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const pathname = usePathname();
+  const { locale } = useLocale();
+  const at = AGENT_T[locale];
 
   // Hide on property detail pages — those have their own sticky contact bar
   const isDetailPage = /^\/bat-dong-san\/.+/.test(pathname);
@@ -20,7 +29,7 @@ export default function AgentWidget() {
         <div className="bg-white rounded-2xl shadow-2xl w-72 overflow-hidden border border-gray-100 animate-in slide-in-from-bottom-4 fade-in duration-200">
           {/* Header */}
           <div className="bg-red-600 px-4 py-3 flex items-center justify-between">
-            <span className="text-white font-semibold text-sm">Tư vấn bất động sản</span>
+            <span className="text-white font-semibold text-sm">{at.title}</span>
             <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white">
               <ChevronDown className="w-4 h-4" />
             </button>
@@ -48,7 +57,7 @@ export default function AgentWidget() {
           {/* Message bubble */}
           <div className="px-4 py-3 bg-gray-50">
             <div className="bg-white rounded-xl rounded-tl-none p-3 shadow-sm border border-gray-100 text-sm text-gray-700 leading-relaxed">
-              Xin chào! Bạn cần tư vấn về bất động sản? Tôi sẵn sàng hỗ trợ bạn tìm căn nhà phù hợp nhất 🏠
+              {at.greeting}
             </div>
           </div>
 
@@ -98,7 +107,7 @@ export default function AgentWidget() {
           <div className="relative">
             <Image
               src="/images/agent-avatar.jpg"
-              alt="Tư vấn viên"
+              alt={at.agent}
               width={48}
               height={48}
               className="rounded-full object-cover w-12 h-12 border-2 border-red-500"
@@ -107,8 +116,8 @@ export default function AgentWidget() {
           </div>
           {!open && (
             <div className="text-left py-2">
-              <p className="text-xs font-bold text-gray-900 leading-tight">Cần tư vấn?</p>
-              <p className="text-xs text-gray-500 leading-tight">Chat với chúng tôi</p>
+              <p className="text-xs font-bold text-gray-900 leading-tight">{at.needHelp}</p>
+              <p className="text-xs text-gray-500 leading-tight">{at.chatWithUs}</p>
             </div>
           )}
         </button>

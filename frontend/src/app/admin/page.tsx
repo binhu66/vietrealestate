@@ -5,8 +5,7 @@ import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
-
-const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+import { ADMIN_EMAILS } from "@/lib/config";
 
 export default function AdminLoginPage() {
   const { locale } = useLocale();

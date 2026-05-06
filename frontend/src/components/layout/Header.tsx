@@ -6,6 +6,7 @@ import { Menu, X, Globe, ChevronDown, LogOut, User } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
 import { useUser, signOut } from "@/lib/auth";
+import { ADMIN_EMAILS } from "@/lib/config";
 
 export default function Header() {
   const { locale, setLocale } = useLocale();
@@ -40,15 +41,16 @@ export default function Header() {
     router.refresh();
   }
 
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email ?? "");
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Tài khoản";
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <header className="sticky top-0 z-[2000] bg-white shadow-sm border-b border-gray-100">
       {/* Top bar */}
       <div className="bg-red-600 text-white text-xs py-1 px-4 flex justify-between items-center">
         <span>📞 Hotline: 1800 6834 | 08:00 - 21:00</span>
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="hover:text-yellow-300 transition-colors">{t.nav.admin}</Link>
+          {isAdmin && <Link href="/admin" className="hover:text-yellow-300 transition-colors">{t.nav.admin}</Link>}
           {!authLoading && !user && (
             <>
               <Link href="/dang-nhap" className="hover:text-yellow-300 transition-colors">{t.nav.dangnhap}</Link>
@@ -67,7 +69,7 @@ export default function Header() {
           </div>
           <div className="leading-none">
             <div className="font-black text-red-600 text-lg tracking-tight">VietRealty</div>
-            <div className="text-gray-400 text-[10px] leading-tight">Bất động sản</div>
+            <div className="text-gray-400 text-[10px] leading-tight">{locale === "zh" ? "房产" : locale === "en" ? "Real Estate" : "Bất động sản"}</div>
           </div>
         </Link>
 
@@ -145,6 +147,15 @@ export default function Header() {
                   >
                     + Đăng tin
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setUserOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-t border-gray-100"
+                    >
+                      🛡️ Quản trị
+                    </Link>
+                  )}
                   <button
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"

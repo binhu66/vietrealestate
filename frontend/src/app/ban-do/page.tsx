@@ -9,6 +9,8 @@ import { SlidersHorizontal, X, ChevronDown, MapPin } from "lucide-react";
 import MapFilterModal, { type MapFilters, EMPTY_FILTERS } from "@/components/map/MapFilterModal";
 import { supabase } from "@/lib/supabase";
 import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
+import { useLocale } from "@/lib/locale";
+import { getT } from "@/i18n";
 
 const PropertyMap = dynamic(() => import("@/components/map/PropertyMap"), { ssr: false });
 
@@ -33,6 +35,8 @@ function countActiveFilters(f: MapFilters): number {
 }
 
 function MapContent() {
+  const { locale } = useLocale();
+  const t = getT(locale);
   const searchParams = useSearchParams();
   const focusLat = searchParams.get("lat") ? Number(searchParams.get("lat")) : undefined;
   const focusLng = searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined;
@@ -130,12 +134,12 @@ function MapContent() {
   const mapFiltered = filtered.filter(p => p.lat && p.lng);
 
   const TABS: { id: ListingTab; label: string; color: string; active: string }[] = [
-    { id: "ban",       label: "Mua bán",    color: "text-gray-600 hover:text-red-600",   active: "text-red-600 border-b-2 border-red-600" },
-    { id: "thue",      label: "Cho thuê",   color: "text-gray-600 hover:text-blue-600",  active: "text-blue-600 border-b-2 border-blue-600" },
-    { id: "thuong-mai",label: "Thương mại", color: "text-gray-600 hover:text-amber-600", active: "text-amber-600 border-b-2 border-amber-600" },
+    { id: "ban",       label: t.map.tabSale,       color: "text-gray-600 hover:text-red-600",   active: "text-red-600 border-b-2 border-red-600" },
+    { id: "thue",      label: t.map.tabRent,       color: "text-gray-600 hover:text-blue-600",  active: "text-blue-600 border-b-2 border-blue-600" },
+    { id: "thuong-mai",label: t.map.tabCommercial, color: "text-gray-600 hover:text-amber-600", active: "text-amber-600 border-b-2 border-amber-600" },
   ];
 
-  const SORT_LABELS = { newest: "Mới nhất", price_asc: "Giá tăng dần", price_desc: "Giá giảm dần" };
+  const SORT_LABELS = { newest: t.map.sortNewest, price_asc: t.map.sortPriceAsc, price_desc: t.map.sortPriceDesc };
 
   return (
     <div className="flex h-[calc(100vh-5.75rem)] -mb-14 sm:mb-0">
@@ -159,11 +163,11 @@ function MapContent() {
         {/* Count + polygon indicator */}
         <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 flex items-center gap-2">
           <span>
-            <span className="font-semibold text-gray-800">{filtered.length}</span> bất động sản
+            <span className="font-semibold text-gray-800">{filtered.length}</span> {t.map.listings}
           </span>
           {polygonIds !== null && (
             <span className="flex items-center gap-1 ml-auto px-2 py-0.5 bg-red-50 text-red-700 rounded-full border border-red-200 font-medium">
-              ✏️ Trong vùng vẽ
+              ✏️ {t.map.inDrawArea}
               <button onClick={() => setPolygonIds(null)} className="ml-1 hover:text-red-900">
                 <X className="w-3 h-3" />
               </button>
@@ -179,7 +183,7 @@ function MapContent() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${countActiveFilters(filters) > 0 ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-700 hover:border-gray-300"}`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              Lọc
+              {t.map.filter}
               {countActiveFilters(filters) > 0 && (
                 <span className="w-4 h-4 rounded-full bg-red-600 text-white text-[10px] flex items-center justify-center">
                   {countActiveFilters(filters)}
@@ -225,7 +229,7 @@ function MapContent() {
                 onClick={() => setFilters(EMPTY_FILTERS)}
                 className="px-2 py-0.5 text-xs text-gray-500 hover:text-red-600 underline transition-colors"
               >
-                Xóa tất cả
+                {t.map.clearAll}
               </button>
             </div>
           )}
@@ -236,8 +240,8 @@ function MapContent() {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400 text-sm gap-2 p-6">
               <MapPin className="w-8 h-8 opacity-40" />
-              <p className="text-center">Không tìm thấy bất động sản phù hợp</p>
-              <button onClick={() => setFilters(EMPTY_FILTERS)} className="text-red-600 hover:underline text-xs">Xóa bộ lọc</button>
+              <p className="text-center">{t.map.noResults}</p>
+              <button onClick={() => setFilters(EMPTY_FILTERS)} className="text-red-600 hover:underline text-xs">{t.map.clearFilter}</button>
             </div>
           ) : (
             filtered.map((p) => (
@@ -257,16 +261,16 @@ function MapContent() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1 mb-0.5">
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${p.type === "ban" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
-                      {p.type === "ban" ? "Bán" : "Thuê"}
+                      {p.type === "ban" ? t.map.sell : t.map.rent}
                     </span>
                     {p.isVip && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700">VIP</span>}
                   </div>
-                  <div className="text-red-600 font-bold text-sm leading-tight">{formatPrice(p.price, p.priceUnit)}</div>
+                  <div className="text-red-600 font-bold text-sm leading-tight">{formatPrice(p.price, p.priceUnit, locale)}</div>
                   <div className="text-gray-800 text-xs font-medium truncate group-hover:text-red-700 transition-colors">{p.title}</div>
                   <div className="text-gray-400 text-xs flex items-center gap-2 mt-0.5">
                     <span className="truncate">{p.district}</span>
                     {p.area && <span>· {p.area}m²</span>}
-                    {p.bedrooms && <span>· {p.bedrooms}PN</span>}
+                    {p.bedrooms && <span>· {p.bedrooms}{t.map.bedroomsAbbr}</span>}
                   </div>
                 </div>
               </Link>
