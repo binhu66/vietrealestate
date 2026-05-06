@@ -8,9 +8,16 @@ import { supabase } from "@/lib/supabase";
 
 const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
 
+const ADMIN_T = {
+  vi: { wrongCreds: "Email hoặc mật khẩu không đúng", notAdmin: "Tài khoản không có quyền admin" },
+  en: { wrongCreds: "Incorrect email or password", notAdmin: "Account does not have admin access" },
+  zh: { wrongCreds: "邮箱或密码错误", notAdmin: "账户无管理员权限" },
+} as const;
+
 export default function AdminLoginPage() {
   const { locale } = useLocale();
   const t = getT(locale);
+  const at = ADMIN_T[locale];
   const router = useRouter();
 
   const [email, setEmail]   = useState("");
@@ -33,13 +40,13 @@ export default function AdminLoginPage() {
     setError("");
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      setError("Email hoặc mật khẩu không đúng");
+      setError(at.wrongCreds);
       setLoading(false);
       return;
     }
     if (!ADMIN_EMAILS.includes(data.user?.email ?? "")) {
       await supabase.auth.signOut();
-      setError("Tài khoản không có quyền admin");
+      setError(at.notAdmin);
       setLoading(false);
       return;
     }

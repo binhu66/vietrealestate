@@ -5,6 +5,33 @@ import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
 
+const USERS_T = {
+  vi: {
+    fetchFailed: "Không thể tải dữ liệu",
+    errorPrefix: "Lỗi: ",
+    loading: "Đang tải...",
+    loadingFromDb: "Đang tải từ Supabase...",
+    retry: "Thử lại",
+    emptyDb: "Chưa có người dùng nào",
+  },
+  en: {
+    fetchFailed: "Failed to load data",
+    errorPrefix: "Error: ",
+    loading: "Loading...",
+    loadingFromDb: "Loading from Supabase...",
+    retry: "Retry",
+    emptyDb: "No users yet",
+  },
+  zh: {
+    fetchFailed: "无法加载数据",
+    errorPrefix: "错误：",
+    loading: "加载中...",
+    loadingFromDb: "正在从 Supabase 加载...",
+    retry: "重试",
+    emptyDb: "暂无用户",
+  },
+} as const;
+
 interface UserRow {
   id: string;
   full_name: string | null;
@@ -19,6 +46,7 @@ interface UserRow {
 export default function AdminUsersPage() {
   const { locale } = useLocale();
   const t = getT(locale);
+  const ut = USERS_T[locale];
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +78,7 @@ export default function AdminUsersPage() {
 
       setUsers((data ?? []).map(u => ({ ...u, listing_count: countMap[u.id] || 0 })));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Không thể tải dữ liệu");
+      setError(e instanceof Error ? e.message : ut.fetchFailed);
     } finally {
       setLoading(false);
     }
@@ -66,7 +94,7 @@ export default function AdminUsersPage() {
       .update({ status: newStatus })
       .eq("id", u.id);
     if (err) {
-      alert("Lỗi: " + err.message);
+      alert(ut.errorPrefix + err.message);
     } else {
       setUsers(prev => prev.map(row => row.id === u.id ? { ...row, status: newStatus } : row));
     }
@@ -95,7 +123,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">{t.admin.users}</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            {loading ? "Đang tải..." : `${users.length} ${t.admin.usersLabel}`}
+            {loading ? ut.loading : `${users.length} ${t.admin.usersLabel}`}
           </p>
         </div>
         <button
@@ -134,7 +162,7 @@ export default function AdminUsersPage() {
         <div className="flex items-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
-          <button onClick={fetchUsers} className="ml-auto underline hover:no-underline">Thử lại</button>
+          <button onClick={fetchUsers} className="ml-auto underline hover:no-underline">{ut.retry}</button>
         </div>
       )}
 
@@ -142,7 +170,7 @@ export default function AdminUsersPage() {
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-400">
             <Loader2 className="w-6 h-6 animate-spin mr-2" />
-            <span className="text-sm">Đang tải từ Supabase...</span>
+            <span className="text-sm">{ut.loadingFromDb}</span>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -212,7 +240,7 @@ export default function AdminUsersPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
-                    {users.length === 0 ? "Chưa có người dùng nào" : t.admin.noResults}
+                    {users.length === 0 ? ut.emptyDb : t.admin.noResults}
                   </td>
                 </tr>
               )}

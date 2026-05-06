@@ -12,9 +12,40 @@ import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapt
 
 type SortField = "price" | "area" | "postedAt" | "views";
 
+const PROPS_T = {
+  vi: {
+    fetchFailed: "Không thể tải dữ liệu",
+    deleteFailed: "Không thể xóa: ",
+    refresh: "Làm mới",
+    loading: "Đang tải...",
+    loadingFromDb: "Đang tải dữ liệu từ Supabase...",
+    retry: "Thử lại",
+    emptyDb: "Chưa có tin đăng nào trong Supabase",
+  },
+  en: {
+    fetchFailed: "Failed to load data",
+    deleteFailed: "Could not delete: ",
+    refresh: "Refresh",
+    loading: "Loading...",
+    loadingFromDb: "Loading data from Supabase...",
+    retry: "Retry",
+    emptyDb: "No listings in Supabase yet",
+  },
+  zh: {
+    fetchFailed: "无法加载数据",
+    deleteFailed: "无法删除：",
+    refresh: "刷新",
+    loading: "加载中...",
+    loadingFromDb: "正在从 Supabase 加载...",
+    retry: "重试",
+    emptyDb: "Supabase 中暂无房源",
+  },
+} as const;
+
 export default function AdminPropertiesPage() {
   const { locale } = useLocale();
   const t = getT(locale);
+  const pt = PROPS_T[locale];
   const [data, setData] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +73,7 @@ export default function AdminPropertiesPage() {
         setTotalCount(count ?? rows.length);
       }
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Không thể tải dữ liệu";
+      const msg = e instanceof Error ? e.message : pt.fetchFailed;
       setError(msg);
     } finally {
       setLoading(false);
@@ -60,7 +91,7 @@ export default function AdminPropertiesPage() {
       .eq("id", id);
 
     if (err) {
-      alert("Không thể xóa: " + err.message);
+      alert(pt.deleteFailed + err.message);
     } else {
       setData(prev => prev.filter(p => p.id !== id));
       setTotalCount(c => c - 1);
@@ -115,7 +146,7 @@ export default function AdminPropertiesPage() {
         <div>
           <h1 className="text-2xl font-black text-gray-900 dark:text-white">{t.admin.properties}</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            {loading ? "Đang tải..." : `${totalCount} ${t.admin.propertiesLabel}`}
+            {loading ? pt.loading : `${totalCount} ${t.admin.propertiesLabel}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -123,7 +154,7 @@ export default function AdminPropertiesPage() {
             onClick={fetchListings}
             disabled={loading}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40"
-            title="Làm mới"
+            title={pt.refresh}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
@@ -179,7 +210,7 @@ export default function AdminPropertiesPage() {
         <div className="flex items-center gap-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
-          <button onClick={fetchListings} className="ml-auto underline hover:no-underline">Thử lại</button>
+          <button onClick={fetchListings} className="ml-auto underline hover:no-underline">{pt.retry}</button>
         </div>
       )}
 
@@ -188,7 +219,7 @@ export default function AdminPropertiesPage() {
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-400">
             <Loader2 className="w-6 h-6 animate-spin mr-2" />
-            <span className="text-sm">Đang tải dữ liệu từ Supabase...</span>
+            <span className="text-sm">{pt.loadingFromDb}</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -267,7 +298,7 @@ export default function AdminPropertiesPage() {
                 {filtered.length === 0 && !loading && (
                   <tr>
                     <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
-                      {data.length === 0 ? "Chưa có tin đăng nào trong Supabase" : t.admin.noResults}
+                      {data.length === 0 ? pt.emptyDb : t.admin.noResults}
                     </td>
                   </tr>
                 )}
