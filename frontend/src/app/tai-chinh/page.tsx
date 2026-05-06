@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Calculator, TrendingUp, Building2, ChevronRight, Info } from "lucide-react";
 import { useLocale } from "@/lib/locale";
+import type { Locale } from "@/i18n";
 
 // Vietnamese bank rates (approximate, 2025)
 const BANKS = [
@@ -16,6 +17,126 @@ const BANKS = [
   { name: "ACB",          rate: 8.8,  maxLTV: 75, color: "bg-blue-500" },
 ];
 
+const FINANCE_T = {
+  vi: {
+    title: "Công cụ tài chính bất động sản",
+    sub: "Tính toán vay mua nhà, lợi suất đầu tư và so sánh lãi suất ngân hàng",
+    mortgage: "Máy tính vay mua nhà",
+    propPrice: "Giá trị bất động sản (tỷ VNĐ)",
+    downPct: "Tỷ lệ vốn tự có (%)",
+    years: "Thời hạn vay (năm)",
+    rate: "Lãi suất (%/năm)",
+    orChooseBank: "Hoặc chọn ngân hàng:",
+    monthly: "Trả hàng tháng",
+    principal: "Số tiền vay",
+    totalInterest: "Tổng lãi phải trả",
+    totalPayment: "Tổng tiền trả",
+    roi: "Tính lợi nhuận cho thuê",
+    roiPrice: "Giá mua (tỷ VNĐ)",
+    roiRent: "Tiền thuê (triệu/tháng)",
+    roiCost: "Chi phí vận hành (%/năm)",
+    roiCostHint: "(quản lý, bảo trì, thuế...)",
+    grossYield: "Lợi suất gộp",
+    netYield: "Lợi suất ròng",
+    payback: "Hoàn vốn",
+    paybackUnit: "năm",
+    bankRates: "Lãi suất ngân hàng hiện hành",
+    maxLTV: "Tối đa vay",
+    note: "* Lãi suất tham khảo, liên hệ ngân hàng để biết lãi suất thực tế",
+    viewListings: "Tìm bất động sản phù hợp",
+    unitBillion: "tỷ VNĐ",
+    unitMillionPerMonth: "tr/tháng",
+    perYear: "%/năm",
+    benchmark: "Lợi suất ròng nhà ở VN thường 4–7%, thương mại 6–9%. Lãi tiết kiệm ~5.5%.",
+    bankCol: "Ngân hàng",
+    rateCol: "Lãi suất",
+    exampleCol: "20 năm · 70%",
+    ctaTitle: "Đã tính xong? Tìm bất động sản ngay!",
+    ctaSub: "Hàng nghìn tin đăng mua bán, cho thuê toàn quốc",
+    fmtBillion: (n: string) => `${n} tỷ`,
+    fmtMillion: (n: string) => `${n} triệu`,
+    fmtMillionPerMonth: (n: string) => `${n} triệu/tháng`,
+  },
+  en: {
+    title: "Real Estate Finance Tools",
+    sub: "Calculate mortgage, rental yield and compare bank interest rates",
+    mortgage: "Mortgage Calculator",
+    propPrice: "Property Value (billion VND)",
+    downPct: "Down Payment (%)",
+    years: "Loan Term (years)",
+    rate: "Interest Rate (%/year)",
+    orChooseBank: "Or choose a bank:",
+    monthly: "Monthly Payment",
+    principal: "Loan Amount",
+    totalInterest: "Total Interest",
+    totalPayment: "Total Payment",
+    roi: "Rental Yield Calculator",
+    roiPrice: "Purchase Price (billion VND)",
+    roiRent: "Monthly Rent (million VND)",
+    roiCost: "Operating Cost (%/year)",
+    roiCostHint: "(management, maintenance, tax...)",
+    grossYield: "Gross Yield",
+    netYield: "Net Yield",
+    payback: "Payback",
+    paybackUnit: "years",
+    bankRates: "Current Bank Rates",
+    maxLTV: "Max LTV",
+    note: "* Reference rates only. Contact banks for actual rates",
+    viewListings: "Find properties",
+    unitBillion: "B VND",
+    unitMillionPerMonth: "M/mo",
+    perYear: "%/year",
+    benchmark: "Vietnam residential net yield typically 4–7%, commercial 6–9%. Bank savings ~5.5%.",
+    bankCol: "Bank",
+    rateCol: "Rate",
+    exampleCol: "20 yr · 70%",
+    ctaTitle: "Ready to find your property?",
+    ctaSub: "Browse thousands of listings across Vietnam",
+    fmtBillion: (n: string) => `${n}B VND`,
+    fmtMillion: (n: string) => `${n}M VND`,
+    fmtMillionPerMonth: (n: string) => `${n}M VND/mo`,
+  },
+  zh: {
+    title: "房产金融工具",
+    sub: "计算房贷、租金回报率及银行利率对比",
+    mortgage: "房贷计算器",
+    propPrice: "房产价值（十亿越南盾）",
+    downPct: "首付比例（%）",
+    years: "贷款年限（年）",
+    rate: "年利率（%）",
+    orChooseBank: "或选择银行：",
+    monthly: "每月还款",
+    principal: "贷款金额",
+    totalInterest: "总利息",
+    totalPayment: "总还款",
+    roi: "出租收益计算器",
+    roiPrice: "购买价格（十亿越南盾）",
+    roiRent: "月租金（百万越南盾）",
+    roiCost: "运营成本（%/年）",
+    roiCostHint: "（管理、维护、税费等）",
+    grossYield: "毛收益率",
+    netYield: "净收益率",
+    payback: "回本周期",
+    paybackUnit: "年",
+    bankRates: "当前银行利率",
+    maxLTV: "最高贷款比例",
+    note: "* 参考利率，实际利率请联系银行",
+    viewListings: "寻找合适房产",
+    unitBillion: "十亿越南盾",
+    unitMillionPerMonth: "百万/月",
+    perYear: "%/年",
+    benchmark: "越南住宅净收益率通常在 4–7%，商业地产 6–9%。银行存款约 5.5%。",
+    bankCol: "银行",
+    rateCol: "利率",
+    exampleCol: "20年 · 70%",
+    ctaTitle: "找到合适的房产了吗？",
+    ctaSub: "浏览越南最新房源，马上联系中介",
+    fmtBillion: (n: string) => `${n}十亿越南盾`,
+    fmtMillion: (n: string) => `${n}百万越南盾`,
+    fmtMillionPerMonth: (n: string) => `${n}百万/月`,
+  },
+} as const;
+
 function calcMonthly(principal: number, annualRate: number, years: number): number {
   if (principal <= 0 || annualRate <= 0 || years <= 0) return 0;
   const r = annualRate / 100 / 12;
@@ -23,14 +144,14 @@ function calcMonthly(principal: number, annualRate: number, years: number): numb
   return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
 }
 
-function fmtVND(n: number): string {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)} tỷ`;
-  if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(0)} triệu`;
+function fmtVND(n: number, L: typeof FINANCE_T[Locale]): string {
+  if (n >= 1_000_000_000) return L.fmtBillion((n / 1_000_000_000).toFixed(2));
+  if (n >= 1_000_000)     return L.fmtMillion((n / 1_000_000).toFixed(0));
   return n.toLocaleString("vi-VN") + " ₫";
 }
 
-function fmtM(n: number): string {
-  return `${(n / 1_000_000).toFixed(1)} triệu/tháng`;
+function fmtM(n: number, L: typeof FINANCE_T[Locale]): string {
+  return L.fmtMillionPerMonth((n / 1_000_000).toFixed(1));
 }
 
 export default function TaiChinhPage() {
@@ -73,86 +194,7 @@ export default function TaiChinhPage() {
     return { grossYield, netYield, payback };
   }, [roiPrice, roiRent, roiCost]);
 
-  const L = {
-    vi: {
-      title: "Công cụ tài chính bất động sản",
-      sub: "Tính toán vay mua nhà, lợi suất đầu tư và so sánh lãi suất ngân hàng",
-      mortgage: "Máy tính vay mua nhà",
-      propPrice: "Giá trị bất động sản (tỷ VNĐ)",
-      downPct: "Tỷ lệ vốn tự có (%)",
-      years: "Thời hạn vay (năm)",
-      rate: "Lãi suất (%/năm)",
-      orChooseBank: "Hoặc chọn ngân hàng:",
-      monthly: "Trả hàng tháng",
-      principal: "Số tiền vay",
-      totalInterest: "Tổng lãi phải trả",
-      totalPayment: "Tổng tiền trả",
-      roi: "Tính lợi nhuận cho thuê",
-      roiPrice: "Giá mua (tỷ VNĐ)",
-      roiRent: "Tiền thuê (triệu/tháng)",
-      roiCost: "Chi phí vận hành (%/năm)",
-      grossYield: "Lợi suất gộp",
-      netYield: "Lợi suất ròng",
-      payback: "Hoàn vốn",
-      paybackUnit: "năm",
-      bankRates: "Lãi suất ngân hàng hiện hành",
-      maxLTV: "Tối đa vay",
-      note: "* Lãi suất tham khảo, liên hệ ngân hàng để biết lãi suất thực tế",
-      viewListings: "Tìm bất động sản phù hợp",
-    },
-    en: {
-      title: "Real Estate Finance Tools",
-      sub: "Calculate mortgage, rental yield and compare bank interest rates",
-      mortgage: "Mortgage Calculator",
-      propPrice: "Property Value (billion VND)",
-      downPct: "Down Payment (%)",
-      years: "Loan Term (years)",
-      rate: "Interest Rate (%/year)",
-      orChooseBank: "Or choose a bank:",
-      monthly: "Monthly Payment",
-      principal: "Loan Amount",
-      totalInterest: "Total Interest",
-      totalPayment: "Total Payment",
-      roi: "Rental Yield Calculator",
-      roiPrice: "Purchase Price (billion VND)",
-      roiRent: "Monthly Rent (million VND)",
-      roiCost: "Operating Cost (%/year)",
-      grossYield: "Gross Yield",
-      netYield: "Net Yield",
-      payback: "Payback",
-      paybackUnit: "years",
-      bankRates: "Current Bank Rates",
-      maxLTV: "Max LTV",
-      note: "* Reference rates only. Contact banks for actual rates",
-      viewListings: "Find properties",
-    },
-    zh: {
-      title: "房产金融工具",
-      sub: "计算房贷、租金回报率及银行利率对比",
-      mortgage: "房贷计算器",
-      propPrice: "房产价值（十亿越南盾）",
-      downPct: "首付比例（%）",
-      years: "贷款年限（年）",
-      rate: "年利率（%）",
-      orChooseBank: "或选择银行：",
-      monthly: "每月还款",
-      principal: "贷款金额",
-      totalInterest: "总利息",
-      totalPayment: "总还款",
-      roi: "出租收益计算器",
-      roiPrice: "购买价格（十亿越南盾）",
-      roiRent: "月租金（百万越南盾）",
-      roiCost: "运营成本（%/年）",
-      grossYield: "毛收益率",
-      netYield: "净收益率",
-      payback: "回本周期",
-      paybackUnit: "年",
-      bankRates: "当前银行利率",
-      maxLTV: "最高贷款比例",
-      note: "* 参考利率，实际利率请联系银行",
-      viewListings: "寻找合适房产",
-    },
-  }[locale] ?? {} as never;
+  const L = FINANCE_T[locale];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -179,13 +221,13 @@ export default function TaiChinhPage() {
                 <input type="number" value={propPrice} onChange={e => setPropPrice(e.target.value)} min="0.1" step="0.1"
                   className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
-                <span className="text-sm text-gray-500 whitespace-nowrap">tỷ VNĐ</span>
+                <span className="text-sm text-gray-500 whitespace-nowrap">{L.unitBillion}</span>
               </div>
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">
-                {L.downPct} — <span className="text-red-600">{fmtVND(mortgage.down)}</span>
+                {L.downPct} — <span className="text-red-600">{fmtVND(mortgage.down, L)}</span>
               </label>
               <input type="range" min="10" max="90" value={downPct} onChange={e => setDownPct(e.target.value)}
                 className="w-full accent-red-600"
@@ -232,20 +274,20 @@ export default function TaiChinhPage() {
           <div className="mt-5 bg-red-50 rounded-2xl p-5 space-y-3">
             <div className="text-center">
               <p className="text-xs text-gray-500 mb-1">{L.monthly}</p>
-              <p className="text-3xl font-black text-red-600">{fmtM(mortgage.monthly)}</p>
+              <p className="text-3xl font-black text-red-600">{fmtM(mortgage.monthly, L)}</p>
             </div>
             <div className="grid grid-cols-3 gap-3 pt-3 border-t border-red-100">
               <div className="text-center">
                 <p className="text-[10px] text-gray-500">{L.principal}</p>
-                <p className="text-sm font-bold text-gray-800">{fmtVND(mortgage.principal)}</p>
+                <p className="text-sm font-bold text-gray-800">{fmtVND(mortgage.principal, L)}</p>
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-gray-500">{L.totalInterest}</p>
-                <p className="text-sm font-bold text-red-600">{fmtVND(mortgage.interest)}</p>
+                <p className="text-sm font-bold text-red-600">{fmtVND(mortgage.interest, L)}</p>
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-gray-500">{L.totalPayment}</p>
-                <p className="text-sm font-bold text-gray-800">{fmtVND(mortgage.total)}</p>
+                <p className="text-sm font-bold text-gray-800">{fmtVND(mortgage.total, L)}</p>
               </div>
             </div>
           </div>
@@ -267,7 +309,7 @@ export default function TaiChinhPage() {
                 <input type="number" value={roiPrice} onChange={e => setRoiPrice(e.target.value)} min="0.1" step="0.1"
                   className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-                <span className="text-sm text-gray-500 whitespace-nowrap">tỷ VNĐ</span>
+                <span className="text-sm text-gray-500 whitespace-nowrap">{L.unitBillion}</span>
               </div>
             </div>
 
@@ -277,19 +319,19 @@ export default function TaiChinhPage() {
                 <input type="number" value={roiRent} onChange={e => setRoiRent(e.target.value)} min="0" step="0.5"
                   className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-                <span className="text-sm text-gray-500 whitespace-nowrap">tr/tháng</span>
+                <span className="text-sm text-gray-500 whitespace-nowrap">{L.unitMillionPerMonth}</span>
               </div>
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700 block mb-1">
-                {L.roiCost} <span className="text-gray-400 text-xs">(quản lý, bảo trì, thuế...)</span>
+                {L.roiCost} <span className="text-gray-400 text-xs">{L.roiCostHint}</span>
               </label>
               <input type="range" min="0" max="15" value={roiCost} onChange={e => setRoiCost(e.target.value)}
                 className="w-full accent-green-600"
               />
               <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>0%</span><span className="font-semibold text-gray-700">{roiCost}%/năm</span><span>15%</span>
+                <span>0%</span><span className="font-semibold text-gray-700">{roiCost}{L.perYear}</span><span>15%</span>
               </div>
             </div>
           </div>
@@ -316,13 +358,7 @@ export default function TaiChinhPage() {
             {/* Benchmark */}
             <div className="flex items-start gap-2 bg-amber-50 rounded-xl p-3 border border-amber-100">
               <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-700">
-                {locale === "zh"
-                  ? "越南住宅净收益率通常在 4–7%，商业地产 6–9%。银行存款约 5.5%。"
-                  : locale === "en"
-                  ? "Vietnam residential net yield typically 4–7%, commercial 6–9%. Bank savings ~5.5%."
-                  : "Lợi suất ròng nhà ở VN thường 4–7%, thương mại 6–9%. Lãi tiết kiệm ~5.5%."}
-              </div>
+              <div className="text-xs text-amber-700">{L.benchmark}</div>
             </div>
           </div>
         </div>
@@ -338,10 +374,10 @@ export default function TaiChinhPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-2 pr-4 text-gray-500 font-semibold">Ngân hàng</th>
-                <th className="text-center py-2 px-3 text-gray-500 font-semibold">Lãi suất</th>
+                <th className="text-left py-2 pr-4 text-gray-500 font-semibold">{L.bankCol}</th>
+                <th className="text-center py-2 px-3 text-gray-500 font-semibold">{L.rateCol}</th>
                 <th className="text-center py-2 px-3 text-gray-500 font-semibold">{L.maxLTV}</th>
-                <th className="text-right py-2 text-gray-500 font-semibold">20 năm · 70%</th>
+                <th className="text-right py-2 text-gray-500 font-semibold">{L.exampleCol}</th>
               </tr>
             </thead>
             <tbody>
@@ -362,7 +398,7 @@ export default function TaiChinhPage() {
                     </td>
                     <td className="py-3 px-3 text-center text-gray-600">{b.maxLTV}%</td>
                     <td className="py-3 text-right text-gray-700 font-medium">
-                      {fmtM(exampleMonthly)}
+                      {fmtM(exampleMonthly, L)}
                     </td>
                   </tr>
                 );
@@ -378,12 +414,8 @@ export default function TaiChinhPage() {
       {/* CTA */}
       <div className="bg-gradient-to-r from-red-600 to-rose-600 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <p className="font-bold text-lg mb-1">
-            {locale === "zh" ? "找到合适的房产了吗？" : locale === "en" ? "Ready to find your property?" : "Đã tính xong? Tìm bất động sản ngay!"}
-          </p>
-          <p className="text-red-100 text-sm">
-            {locale === "zh" ? "浏览越南最新房源，马上联系中介" : locale === "en" ? "Browse thousands of listings across Vietnam" : "Hàng nghìn tin đăng mua bán, cho thuê toàn quốc"}
-          </p>
+          <p className="font-bold text-lg mb-1">{L.ctaTitle}</p>
+          <p className="text-red-100 text-sm">{L.ctaSub}</p>
         </div>
         <Link href="/bat-dong-san" className="shrink-0 bg-white text-red-600 font-bold px-6 py-3 rounded-xl hover:bg-red-50 transition-colors flex items-center gap-2">
           {L.viewListings} <ChevronRight className="w-4 h-4" />
