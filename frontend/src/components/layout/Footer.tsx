@@ -105,7 +105,7 @@ export default function Footer() {
             >
               {f.postFree}
             </Link>
-            <h4 className="text-white font-semibold mb-3">Về chúng tôi</h4>
+            <h4 className="text-white font-semibold mb-3">{t.footer.about}</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/gioi-thieu"          className="hover:text-red-400 transition-colors">{t.footer.about}</Link></li>
               <li><a   href={`mailto:${COMPANY_EMAIL}`} className="hover:text-red-400 transition-colors">{t.footer.contact}</a></li>
