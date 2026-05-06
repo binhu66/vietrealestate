@@ -13,10 +13,50 @@ import { useSaved } from "@/lib/savedContext";
 
 type Tab = "listings" | "saved" | "profile";
 
+const ACCOUNT_T = {
+  vi: {
+    account: "Tài khoản", signOut: "Đăng xuất",
+    myListings: "Tin đăng của tôi", saved: "Đã lưu", profile: "Hồ sơ",
+    postNew: "+ Đăng tin mới", loading: "Đang tải...",
+    noListings: "Chưa có tin đăng nào", postNow: "Đăng tin ngay →",
+    active: "Đang đăng", withdraw: "Gỡ tin",
+    savedTitle: "Bất động sản đã lưu", noSaved: "Chưa lưu bất động sản nào", explore: "Khám phá ngay →",
+    profileInfo: "Thông tin hồ sơ", edit: "Chỉnh sửa", save: "Lưu", cancel: "Huỷ",
+    email: "Email", fullName: "Họ tên", namePh: "Nguyễn Văn A",
+    phone: "Số điện thoại", phonePh: "09xx xxx xxx",
+    memberSince: "Thành viên từ", dateLocale: "vi-VN",
+  },
+  en: {
+    account: "Account", signOut: "Sign out",
+    myListings: "My listings", saved: "Saved", profile: "Profile",
+    postNew: "+ New listing", loading: "Loading...",
+    noListings: "No listings yet", postNow: "Post now →",
+    active: "Active", withdraw: "Withdraw",
+    savedTitle: "Saved properties", noSaved: "No saved properties yet", explore: "Explore now →",
+    profileInfo: "Profile info", edit: "Edit", save: "Save", cancel: "Cancel",
+    email: "Email", fullName: "Full name", namePh: "John Doe",
+    phone: "Phone number", phonePh: "09xx xxx xxx",
+    memberSince: "Member since", dateLocale: "en-US",
+  },
+  zh: {
+    account: "账户", signOut: "登出",
+    myListings: "我的房源", saved: "已保存", profile: "个人资料",
+    postNew: "+ 发布新房源", loading: "加载中...",
+    noListings: "暂无房源", postNow: "立即发布 →",
+    active: "已上架", withdraw: "下架",
+    savedTitle: "已保存的房源", noSaved: "暂无已保存的房源", explore: "立即探索 →",
+    profileInfo: "个人资料信息", edit: "编辑", save: "保存", cancel: "取消",
+    email: "电子邮件", fullName: "姓名", namePh: "张三",
+    phone: "电话号码", phonePh: "09xx xxx xxx",
+    memberSince: "注册于", dateLocale: "zh-CN",
+  },
+};
+
 export default function TaiKhoanPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useUser();
   const { locale } = useLocale();
+  const at = ACCOUNT_T[locale];
   const { toggle: toggleSavedCtx } = useSaved();
 
   const [tab, setTab]               = useState<Tab>("listings");
@@ -104,7 +144,7 @@ export default function TaiKhoanPage() {
   }
   if (!user) return null;
 
-  const displayNameLabel = user.user_metadata?.display_name || user.email?.split("@")[0] || "Tài khoản";
+  const displayNameLabel = user.user_metadata?.display_name || user.email?.split("@")[0] || at.account;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -121,16 +161,16 @@ export default function TaiKhoanPage() {
           onClick={handleSignOut}
           className="ml-auto flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 border border-gray-200 px-3 py-2 rounded-lg hover:border-red-300 transition-colors"
         >
-          <LogOut className="w-4 h-4" /> Đăng xuất
+          <LogOut className="w-4 h-4" /> {at.signOut}
         </button>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200 mb-6">
         {([
-          { id: "listings", label: "Tin đăng của tôi", icon: <Home className="w-4 h-4" /> },
-          { id: "saved",    label: "Đã lưu",           icon: <Heart className="w-4 h-4" /> },
-          { id: "profile",  label: "Hồ sơ",            icon: <Settings className="w-4 h-4" /> },
+          { id: "listings", label: at.myListings, icon: <Home className="w-4 h-4" /> },
+          { id: "saved",    label: at.saved,      icon: <Heart className="w-4 h-4" /> },
+          { id: "profile",  label: at.profile,    icon: <Settings className="w-4 h-4" /> },
         ] as { id: Tab; label: string; icon: React.ReactNode }[]).map(t => (
           <button
             key={t.id}
@@ -148,18 +188,18 @@ export default function TaiKhoanPage() {
       {tab === "listings" && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-800">Tin đăng của tôi ({myListings.length})</h2>
+            <h2 className="font-bold text-gray-800">{at.myListings} ({myListings.length})</h2>
             <Link href="/dang-tin" className="bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-red-700 transition-colors">
-              + Đăng tin mới
+              {at.postNew}
             </Link>
           </div>
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải...</div>
+            <div className="flex items-center justify-center py-12 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> {at.loading}</div>
           ) : myListings.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <Home className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">Chưa có tin đăng nào</p>
-              <Link href="/dang-tin" className="mt-3 inline-block text-red-600 font-semibold text-sm hover:underline">Đăng tin ngay →</Link>
+              <p className="font-medium">{at.noListings}</p>
+              <Link href="/dang-tin" className="mt-3 inline-block text-red-600 font-semibold text-sm hover:underline">{at.postNow}</Link>
             </div>
           ) : (
             <div className="space-y-3">
@@ -174,12 +214,12 @@ export default function TaiKhoanPage() {
                     <div className="text-red-600 font-bold text-sm mt-1">{formatPrice(p.price, p.priceUnit)}</div>
                   </div>
                   <div className="flex flex-col gap-1 shrink-0">
-                    <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium text-center">Đang đăng</span>
+                    <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium text-center">{at.active}</span>
                     <button
                       onClick={() => withdrawListing(p.id)}
                       className="text-xs text-gray-400 hover:text-red-600 border border-gray-200 rounded-lg px-2 py-1 hover:border-red-300 transition-colors"
                     >
-                      Gỡ tin
+                      {at.withdraw}
                     </button>
                   </div>
                 </div>
@@ -192,14 +232,14 @@ export default function TaiKhoanPage() {
       {/* Saved */}
       {tab === "saved" && (
         <div>
-          <h2 className="font-bold text-gray-800 mb-4">Bất động sản đã lưu ({saved.length})</h2>
+          <h2 className="font-bold text-gray-800 mb-4">{at.savedTitle} ({saved.length})</h2>
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Đang tải...</div>
+            <div className="flex items-center justify-center py-12 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /> {at.loading}</div>
           ) : saved.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <Heart className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">Chưa lưu bất động sản nào</p>
-              <Link href="/bat-dong-san" className="mt-3 inline-block text-red-600 font-semibold text-sm hover:underline">Khám phá ngay →</Link>
+              <p className="font-medium">{at.noSaved}</p>
+              <Link href="/bat-dong-san" className="mt-3 inline-block text-red-600 font-semibold text-sm hover:underline">{at.explore}</Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -231,34 +271,34 @@ export default function TaiKhoanPage() {
         <div className="max-w-md">
           <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-gray-800">Thông tin hồ sơ</h2>
+              <h2 className="font-bold text-gray-800">{at.profileInfo}</h2>
               {!editingProfile ? (
                 <button onClick={() => setEditingProfile(true)} className="flex items-center gap-1 text-sm text-red-600 hover:underline font-medium">
-                  <Edit3 className="w-3.5 h-3.5" /> Chỉnh sửa
+                  <Edit3 className="w-3.5 h-3.5" /> {at.edit}
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button onClick={saveProfile} disabled={savingProfile} className="flex items-center gap-1 text-sm text-green-600 hover:underline font-medium disabled:opacity-50">
-                    {savingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Lưu
+                    {savingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} {at.save}
                   </button>
-                  <button onClick={() => setEditingProfile(false)} className="text-sm text-gray-400 hover:text-gray-600">Huỷ</button>
+                  <button onClick={() => setEditingProfile(false)} className="text-sm text-gray-400 hover:text-gray-600">{at.cancel}</button>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{at.email}</label>
               <p className="mt-1 text-sm text-gray-700">{user.email}</p>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Họ tên</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{at.fullName}</label>
               {editingProfile ? (
                 <input
                   value={displayName}
                   onChange={e => setDisplayName(e.target.value)}
                   className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-400"
-                  placeholder="Nguyễn Văn A"
+                  placeholder={at.namePh}
                 />
               ) : (
                 <p className="mt-1 text-sm text-gray-700">{displayName || "—"}</p>
@@ -266,13 +306,13 @@ export default function TaiKhoanPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số điện thoại</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{at.phone}</label>
               {editingProfile ? (
                 <input
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                   className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-400"
-                  placeholder="09xx xxx xxx"
+                  placeholder={at.phonePh}
                 />
               ) : (
                 <p className="mt-1 text-sm text-gray-700">{phone || "—"}</p>
@@ -280,8 +320,8 @@ export default function TaiKhoanPage() {
             </div>
 
             <div className="pt-2 border-t border-gray-100">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Thành viên từ</label>
-              <p className="mt-1 text-sm text-gray-700">{new Date(user.created_at).toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric" })}</p>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{at.memberSince}</label>
+              <p className="mt-1 text-sm text-gray-700">{new Date(user.created_at).toLocaleDateString(at.dateLocale, { year: "numeric", month: "long", day: "numeric" })}</p>
             </div>
           </div>
         </div>
