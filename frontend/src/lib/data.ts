@@ -360,7 +360,21 @@ export const cities = [
   "Long An",
 ];
 
-export function formatPrice(price: number, unit: string): string {
+export function formatPrice(price: number, unit: string, locale: "vi" | "en" | "zh" = "vi"): string {
+  if (locale === "zh") {
+    if (unit === "ty") return `${price} 十亿`;
+    if (unit === "trieu") return `${price} 百万`;
+    if (unit === "trieu/thang") return `${price} 百万/月`;
+    if (unit === "nghin/thang") return `${price}千/月`;
+    return `${price}`;
+  }
+  if (locale === "en") {
+    if (unit === "ty") return `${price}B VND`;
+    if (unit === "trieu") return `${price}M VND`;
+    if (unit === "trieu/thang") return `${price}M/mo`;
+    if (unit === "nghin/thang") return `${price}k/mo`;
+    return `${price}`;
+  }
   if (unit === "ty") return `${price} tỷ`;
   if (unit === "trieu") return `${price} triệu`;
   if (unit === "trieu/thang") return `${price} triệu/tháng`;

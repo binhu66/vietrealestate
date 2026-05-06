@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         // Welcome all bots including AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.)
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/", "/_next/"],
+        disallow: ["/admin/", "/api/geocode", "/api/mapbox-token", "/_next/"],
       },
       // Explicitly allow major AI crawlers for AI-friendly indexing
       { userAgent: "GPTBot", allow: "/" },

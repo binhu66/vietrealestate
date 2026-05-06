@@ -12,7 +12,7 @@ import PropertyCard from "@/components/property/PropertyCard";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
-import { useUser } from "@/lib/auth";
+import { useSaved } from "@/lib/savedContext";
 
 export default function PropertyDetailClient({
   property,
@@ -23,42 +23,20 @@ export default function PropertyDetailClient({
 }) {
   const { locale } = useLocale();
   const t = getT(locale);
-  const { user } = useUser();
+  const { savedIds, toggle } = useSaved();
+  const saved = savedIds.has(property.id);
   const [imgIdx, setImgIdx] = useState(0);
-  const [saved, setSaved] = useState(false);
-  const [savingToggle, setSavingToggle] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
 
-  // Load saved state from Supabase + increment view count
+  // Increment view count (fire-and-forget)
   useEffect(() => {
-    // Increment views (fire-and-forget, UUID listings only)
     if (/^[0-9a-f-]{36}$/.test(property.id)) {
       supabase.rpc("increment_listing_views", { listing_id: property.id }).then(() => {});
     }
   }, [property.id]);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("saved_listings")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("listing_id", property.id)
-      .maybeSingle()
-      .then(({ data }) => { if (data) setSaved(true); });
-  }, [user, property.id]);
-
   async function toggleSave() {
-    if (!user) { window.location.href = "/dang-nhap?redirect=" + encodeURIComponent(window.location.pathname); return; }
-    setSavingToggle(true);
-    if (saved) {
-      await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", property.id);
-      setSaved(false);
-    } else {
-      await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: property.id });
-      setSaved(true);
-    }
-    setSavingToggle(false);
+    await toggle(property.id);
   }
 
   function handleShare() {
@@ -93,7 +71,11 @@ export default function PropertyDetailClient({
           {/* Image gallery */}
           <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
             <div className="relative aspect-video bg-gray-100">
-              <img src={property.images[imgIdx]} alt={title} className="w-full h-full object-cover" />
+              {property.images[imgIdx] ? (
+                <img src={property.images[imgIdx]} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-6xl text-gray-200">🏠</div>
+              )}
               {property.images.length > 1 && (
                 <>
                   <button
@@ -155,7 +137,7 @@ export default function PropertyDetailClient({
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={toggleSave}
-                  disabled={savingToggle}
+                  disabled={false}
                   className={`p-2 rounded-lg border transition-colors disabled:opacity-50 ${saved ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
                   title={saved ? "Bỏ lưu" : "Lưu tin"}
                 >

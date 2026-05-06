@@ -22,50 +22,27 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchHome() {
-      // Fetch VIP listings
-      const { data: vipData } = await supabase
-        .from("listings")
-        .select(LISTING_SELECT)
-        .eq("standard_status", "Active")
-        .gt("vip_level", 0)
-        .order("vip_level", { ascending: false })
-        .order("original_entry_timestamp", { ascending: false })
-        .limit(4);
+      // Fire all 4 queries in parallel
+      const [vipRes, saleRes, rentRes, countRes] = await Promise.all([
+        supabase.from("listings").select(LISTING_SELECT)
+          .eq("standard_status", "Active").gt("vip_level", 0)
+          .order("vip_level", { ascending: false })
+          .order("original_entry_timestamp", { ascending: false })
+          .limit(4),
+        supabase.from("listings").select(LISTING_SELECT)
+          .eq("standard_status", "Active").eq("transaction_type", "For Sale")
+          .order("original_entry_timestamp", { ascending: false }).limit(4),
+        supabase.from("listings").select(LISTING_SELECT)
+          .eq("standard_status", "Active").eq("transaction_type", "For Rent")
+          .order("original_entry_timestamp", { ascending: false }).limit(4),
+        supabase.from("listings").select("id", { count: "exact", head: true })
+          .eq("standard_status", "Active"),
+      ]);
 
-      if (vipData && vipData.length > 0)
-        setVipProps((vipData as unknown as DbListing[]).map(dbToProperty));
-
-      // Fetch latest for-sale
-      const { data: saleData } = await supabase
-        .from("listings")
-        .select(LISTING_SELECT)
-        .eq("standard_status", "Active")
-        .eq("transaction_type", "For Sale")
-        .order("original_entry_timestamp", { ascending: false })
-        .limit(4);
-
-      if (saleData && saleData.length > 0)
-        setForSaleProps((saleData as unknown as DbListing[]).map(dbToProperty));
-
-      // Fetch latest for-rent
-      const { data: rentData } = await supabase
-        .from("listings")
-        .select(LISTING_SELECT)
-        .eq("standard_status", "Active")
-        .eq("transaction_type", "For Rent")
-        .order("original_entry_timestamp", { ascending: false })
-        .limit(4);
-
-      if (rentData && rentData.length > 0)
-        setForRentProps((rentData as unknown as DbListing[]).map(dbToProperty));
-
-      // Get total count
-      const { count } = await supabase
-        .from("listings")
-        .select("id", { count: "exact", head: true })
-        .eq("standard_status", "Active");
-
-      if (count !== null) setTotalCount(count);
+      if (vipRes.data  && vipRes.data.length  > 0) setVipProps((vipRes.data   as unknown as DbListing[]).map(dbToProperty));
+      if (saleRes.data && saleRes.data.length > 0) setForSaleProps((saleRes.data as unknown as DbListing[]).map(dbToProperty));
+      if (rentRes.data && rentRes.data.length > 0) setForRentProps((rentRes.data as unknown as DbListing[]).map(dbToProperty));
+      if (countRes.count !== null) setTotalCount(countRes.count);
     }
     fetchHome();
   }, []);
@@ -162,11 +139,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">🏠 Mua bán bất động sản</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Tin đăng mới nhất hôm nay</p>
+            <h2 className="text-xl font-bold text-gray-900">{t.home.forSaleTitle}</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{t.home.forSaleSub}</p>
           </div>
           <Link href="/bat-dong-san?type=ban" className="flex items-center gap-1 text-red-600 text-sm font-semibold hover:underline">
-            Xem tất cả <ChevronRight className="w-4 h-4" />
+            {t.home.viewAll} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -178,11 +155,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">🔑 Cho thuê bất động sản</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Căn hộ, nhà phố, văn phòng cho thuê</p>
+            <h2 className="text-xl font-bold text-gray-900">{t.home.forRentTitle}</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{t.home.forRentSub}</p>
           </div>
           <Link href="/cho-thue" className="flex items-center gap-1 text-red-600 text-sm font-semibold hover:underline">
-            Xem tất cả <ChevronRight className="w-4 h-4" />
+            {t.home.viewAll} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

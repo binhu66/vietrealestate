@@ -2,12 +2,11 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Building2, Users, LogOut, Menu, X, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Building2, Users, LogOut, Menu, X, Sun, Moon, Newspaper } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
 import { supabase } from "@/lib/supabase";
-
-const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+import { ADMIN_EMAILS } from "@/lib/config";
 
 // Keep context for backwards compat with admin/page.tsx
 type AuthCtx = { token: string | null; setToken: (t: string | null) => void };
@@ -80,6 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/dashboard", icon: <LayoutDashboard className="w-5 h-5" />, label: t.admin.dashboard },
     { href: "/admin/bat-dong-san", icon: <Building2 className="w-5 h-5" />, label: t.admin.properties },
     { href: "/admin/nguoi-dung", icon: <Users className="w-5 h-5" />, label: t.admin.users },
+    { href: "/admin/tin-tuc", icon: <Newspaper className="w-5 h-5" />, label: "Tin tức" },
   ];
 
   async function handleLogout() {

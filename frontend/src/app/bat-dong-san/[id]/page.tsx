@@ -6,6 +6,8 @@ import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapt
 import type { Property } from "@/lib/data";
 import PropertyDetailClient from "./PropertyDetailClient";
 
+export const runtime = "edge";
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
 
 // UUID pattern check
