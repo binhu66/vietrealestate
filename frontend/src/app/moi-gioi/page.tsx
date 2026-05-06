@@ -94,6 +94,39 @@ const AGENTS = [
 
 const CITIES = ["Tất cả", "TP.HCM", "Hà Nội", "Đà Nẵng"];
 
+const PAGE_T = {
+  vi: {
+    title: "Môi giới bất động sản", sub: "Kết nối với chuyên gia uy tín nhất tại địa phương",
+    verified: "Đã xác minh", listings: "tin đăng", years: "năm KN", search: "Tìm môi giới...",
+    all: "Tất cả",
+    statActive: "Môi giới đang hoạt động", statVerified: "Đã xác minh", statListings: "Tổng tin đăng",
+    notFound: "Không tìm thấy môi giới phù hợp",
+    ctaTitle: "Bạn là môi giới?",
+    ctaDesc: "Đăng ký làm môi giới xác minh trên VietRealty để tiếp cận nhiều khách hàng hơn",
+    ctaBtn: "Đăng ký ngay",
+  },
+  en: {
+    title: "Real Estate Agents", sub: "Connect with trusted local experts",
+    verified: "Verified", listings: "listings", years: "yrs exp", search: "Search agents...",
+    all: "All",
+    statActive: "Active Agents", statVerified: "Verified", statListings: "Total Listings",
+    notFound: "No matching agents found",
+    ctaTitle: "Are you an agent?",
+    ctaDesc: "Register as a VietRealty verified agent and reach more buyers",
+    ctaBtn: "Register now",
+  },
+  zh: {
+    title: "房产中介", sub: "与当地最受信赖的专家联系",
+    verified: "已认证", listings: "房源", years: "年经验", search: "搜索中介...",
+    all: "全部",
+    statActive: "活跃中介", statVerified: "已认证", statListings: "总房源",
+    notFound: "未找到匹配的中介",
+    ctaTitle: "您是中介吗？",
+    ctaDesc: "注册成为VietRealty认证中介，获得更多曝光",
+    ctaBtn: "立即注册",
+  },
+};
+
 export default function MoiGioiPage() {
   const { locale } = useLocale();
   const [city, setCity] = useState("Tất cả");
@@ -105,11 +138,7 @@ export default function MoiGioiPage() {
     return matchCity && matchSearch;
   });
 
-  const L = {
-    vi: { title: "Môi giới bất động sản", sub: "Kết nối với chuyên gia uy tín nhất tại địa phương", verified: "Đã xác minh", listings: "tin đăng", years: "năm KN", contact: "Liên hệ", zalo: "Nhắn Zalo", search: "Tìm môi giới..." },
-    en: { title: "Real Estate Agents", sub: "Connect with trusted local experts", verified: "Verified", listings: "listings", years: "yrs exp", contact: "Contact", zalo: "Chat Zalo", search: "Search agents..." },
-    zh: { title: "房产中介", sub: "与当地最受信赖的专家联系", verified: "已认证", listings: "房源", years: "年经验", contact: "联系", zalo: "Zalo联系", search: "搜索中介..." },
-  }[locale] ?? { title: "Môi giới bất động sản", sub: "Kết nối với chuyên gia uy tín nhất tại địa phương", verified: "Đã xác minh", listings: "tin đăng", years: "năm KN", contact: "Liên hệ", zalo: "Nhắn Zalo", search: "Tìm môi giới..." };
+  const L = PAGE_T[locale] ?? PAGE_T.vi;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -122,9 +151,9 @@ export default function MoiGioiPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 mb-8">
         {[
-          { value: AGENTS.length, label: locale === "zh" ? "活跃中介" : locale === "en" ? "Active Agents" : "Môi giới đang hoạt động" },
-          { value: AGENTS.filter(a => a.verified).length, label: locale === "zh" ? "已认证" : locale === "en" ? "Verified" : "Đã xác minh" },
-          { value: AGENTS.reduce((s, a) => s + a.listings, 0), label: locale === "zh" ? "总房源" : locale === "en" ? "Total Listings" : "Tổng tin đăng" },
+          { value: AGENTS.length, label: L.statActive },
+          { value: AGENTS.filter(a => a.verified).length, label: L.statVerified },
+          { value: AGENTS.reduce((s, a) => s + a.listings, 0), label: L.statListings },
         ].map((s, i) => (
           <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
             <div className="text-2xl font-black text-red-600">{s.value}</div>
@@ -149,7 +178,7 @@ export default function MoiGioiPage() {
               onClick={() => setCity(c)}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border ${city === c ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-600 border-gray-200 hover:border-red-400"}`}
             >
-              {c}
+              {c === "Tất cả" ? L.all : c}
             </button>
           ))}
         </div>
@@ -219,20 +248,16 @@ export default function MoiGioiPage() {
       {filtered.length === 0 && (
         <div className="text-center py-16 text-gray-400">
           <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>Không tìm thấy môi giới phù hợp</p>
+          <p>{L.notFound}</p>
         </div>
       )}
 
       {/* CTA for agents */}
       <div className="mt-12 bg-gradient-to-br from-red-600 to-rose-600 rounded-2xl p-8 text-white text-center">
-        <h3 className="text-xl font-black mb-2">
-          {locale === "zh" ? "您是中介吗？" : locale === "en" ? "Are you an agent?" : "Bạn là môi giới?"}
-        </h3>
-        <p className="text-red-100 text-sm mb-5 max-w-md mx-auto">
-          {locale === "zh" ? "注册成为VietRealty认证中介，获得更多曝光" : locale === "en" ? "Register as a VietRealty verified agent and reach more buyers" : "Đăng ký làm môi giới xác minh trên VietRealty để tiếp cận nhiều khách hàng hơn"}
-        </p>
+        <h3 className="text-xl font-black mb-2">{L.ctaTitle}</h3>
+        <p className="text-red-100 text-sm mb-5 max-w-md mx-auto">{L.ctaDesc}</p>
         <Link href="/dang-ky" className="inline-block bg-white text-red-600 font-bold px-6 py-3 rounded-xl hover:bg-red-50 transition-colors">
-          {locale === "zh" ? "立即注册" : locale === "en" ? "Register now" : "Đăng ký ngay"}
+          {L.ctaBtn}
         </Link>
       </div>
     </div>
