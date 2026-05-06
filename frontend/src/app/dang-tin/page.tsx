@@ -17,6 +17,48 @@ interface PhotoPreview {
   url: string;  // object URL for preview
 }
 
+const POST_EXTRA_T = {
+  vi: {
+    authTitle: "Đăng nhập để đăng tin",
+    authDesc: "Bạn cần có tài khoản để đăng bất động sản lên VietRealty.",
+    login: "Đăng nhập",
+    register: "Đăng ký",
+    photoTooLarge: (name: string, mb: number) => `${name} vượt quá ${mb}MB`,
+    unitTy: "Tỷ",
+    unitTrieu: "Triệu",
+    unitTrieuThang: "Triệu/tháng",
+    unitNghinThang: "Nghìn/tháng",
+    coverBadge: "Bìa",
+    genericError: "Đã xảy ra lỗi, vui lòng thử lại.",
+  },
+  en: {
+    authTitle: "Sign in to post a listing",
+    authDesc: "You need an account to post properties on VietRealty.",
+    login: "Sign in",
+    register: "Sign up",
+    photoTooLarge: (name: string, mb: number) => `${name} exceeds ${mb}MB`,
+    unitTy: "Billion",
+    unitTrieu: "Million",
+    unitTrieuThang: "Million/month",
+    unitNghinThang: "Thousand/month",
+    coverBadge: "Cover",
+    genericError: "An error occurred, please try again.",
+  },
+  zh: {
+    authTitle: "登录后发布房源",
+    authDesc: "您需要拥有账号才能在 VietRealty 上发布房产。",
+    login: "登录",
+    register: "注册",
+    photoTooLarge: (name: string, mb: number) => `${name} 超过 ${mb}MB`,
+    unitTy: "十亿",
+    unitTrieu: "百万",
+    unitTrieuThang: "百万/月",
+    unitNghinThang: "千/月",
+    coverBadge: "封面",
+    genericError: "发生错误，请重试。",
+  },
+};
+
 const RESIDENTIAL_IDS = ["can-ho-chung-cu", "nha-rieng", "nha-biet-thu", "dat-nen"];
 const COMMERCIAL_IDS  = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
 
@@ -47,6 +89,7 @@ export default function DangTinPage() {
   const { locale } = useLocale();
   const t = getT(locale).post;
   const tCat = getT(locale).categories;
+  const tx = POST_EXTRA_T[locale];
   const { user, loading: authLoading } = useUser();
 
   const [step,         setStep]         = useState<Step>("type");
@@ -94,14 +137,14 @@ export default function DangTinPage() {
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/")) continue;
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        setPhotoError(`${file.name} vượt quá ${MAX_SIZE_MB}MB`);
+        setPhotoError(tx.photoTooLarge(file.name, MAX_SIZE_MB));
         continue;
       }
       if (photos.length + valid.length >= MAX_PHOTOS) break;
       valid.push({ file, url: URL.createObjectURL(file) });
     }
     setPhotos(prev => [...prev, ...valid].slice(0, MAX_PHOTOS));
-  }, [photos.length]);
+  }, [photos.length, tx]);
 
   function removePhoto(idx: number) {
     setPhotos(prev => {
@@ -208,7 +251,7 @@ export default function DangTinPage() {
       setSavedId(listingId ?? null);
       setStep("done");
     } catch (err: any) {
-      setError(err.message ?? "Error, please try again.");
+      setError(err.message ?? tx.genericError);
     } finally {
       setSubmitting(false);
     }
@@ -299,14 +342,14 @@ export default function DangTinPage() {
       <div className="min-h-[60vh] flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">🔐</div>
-          <h2 className="text-xl font-black text-gray-900 mb-2">Đăng nhập để đăng tin</h2>
-          <p className="text-gray-500 text-sm mb-6">Bạn cần có tài khoản để đăng bất động sản lên VietRealty.</p>
+          <h2 className="text-xl font-black text-gray-900 mb-2">{tx.authTitle}</h2>
+          <p className="text-gray-500 text-sm mb-6">{tx.authDesc}</p>
           <div className="flex gap-3 justify-center">
             <Link href="/dang-nhap?redirect=/dang-tin" className="flex items-center gap-2 bg-red-600 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-red-700 transition-colors">
-              <LogIn className="w-4 h-4" /> Đăng nhập
+              <LogIn className="w-4 h-4" /> {tx.login}
             </Link>
             <Link href="/dang-ky?redirect=/dang-tin" className="flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold px-5 py-2.5 rounded-xl hover:border-red-400 hover:text-red-600 transition-colors">
-              Đăng ký
+              {tx.register}
             </Link>
           </div>
         </div>
@@ -384,10 +427,10 @@ export default function DangTinPage() {
               value={form.priceUnit} onChange={e => set("priceUnit", e.target.value)}
               className="px-3 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
             >
-              <option value="ty">Tỷ</option>
-              <option value="trieu">Triệu</option>
-              <option value="trieu/thang">Triệu/tháng</option>
-              <option value="nghin/thang">Nghìn/tháng</option>
+              <option value="ty">{tx.unitTy}</option>
+              <option value="trieu">{tx.unitTrieu}</option>
+              <option value="trieu/thang">{tx.unitTrieuThang}</option>
+              <option value="nghin/thang">{tx.unitNghinThang}</option>
             </select>
           </div>
         </div>
@@ -505,7 +548,7 @@ export default function DangTinPage() {
                 <div key={p.url} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
                   <img src={p.url} alt="" className="w-full h-full object-cover" />
                   {idx === 0 && (
-                    <span className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-[9px] text-center py-0.5 font-semibold">Bìa</span>
+                    <span className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-[9px] text-center py-0.5 font-semibold">{tx.coverBadge}</span>
                   )}
                   {/* Move left */}
                   {idx > 0 && (
