@@ -9,6 +9,12 @@ import { supabase } from "@/lib/supabase";
 
 const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
 
+const LAYOUT_T = {
+  vi: { lightMode: "Chế độ sáng", darkMode: "Chế độ tối", switchToLight: "Chuyển sang sáng", switchToDark: "Chuyển sang tối", adminFallback: "Quản trị" },
+  en: { lightMode: "Light Mode", darkMode: "Dark Mode", switchToLight: "Switch to Light", switchToDark: "Switch to Dark", adminFallback: "Admin" },
+  zh: { lightMode: "浅色模式", darkMode: "深色模式", switchToLight: "切换为浅色", switchToDark: "切换为深色", adminFallback: "管理" },
+} as const;
+
 // Keep context for backwards compat with admin/page.tsx
 type AuthCtx = { token: string | null; setToken: (t: string | null) => void };
 export const AdminAuthContext = createContext<AuthCtx>({ token: null, setToken: () => {} });
@@ -24,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [dark, setDark] = useState(false);
   const { locale, setLocale } = useLocale();
   const t = getT(locale);
+  const lt = LAYOUT_T[locale];
   const pathname = usePathname();
   const router = useRouter();
 
@@ -163,7 +170,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={toggleDark}
                   className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-white transition-colors"
                 >
-                  <span>{dark ? "Light Mode" : "Dark Mode"}</span>
+                  <span>{dark ? lt.lightMode : lt.darkMode}</span>
                   {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
                 </button>
 
@@ -191,13 +198,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Menu className="w-5 h-5" />
                 </button>
                 <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  {navItems.find((n) => n.href === pathname)?.label || "Admin"}
+                  {navItems.find((n) => n.href === pathname)?.label || lt.adminFallback}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={toggleDark}
                     className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    title={dark ? "Switch to Light" : "Switch to Dark"}
+                    title={dark ? lt.switchToLight : lt.switchToDark}
                   >
                     {dark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4" />}
                   </button>

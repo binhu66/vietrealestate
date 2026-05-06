@@ -9,6 +9,12 @@ import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapt
 import type { Property } from "@/lib/data";
 import { formatPrice } from "@/lib/data";
 
+const DASH_T = {
+  vi: { loading: "Đang tải...", noListings: "Chưa có tin đăng nào", noData: "Chưa có dữ liệu" },
+  en: { loading: "Loading...", noListings: "No listings yet", noData: "No data yet" },
+  zh: { loading: "加载中...", noListings: "暂无房源", noData: "暂无数据" },
+} as const;
+
 interface Stats {
   total: number;
   forSale: number;
@@ -20,6 +26,7 @@ interface Stats {
 export default function DashboardPage() {
   const { locale } = useLocale();
   const t = getT(locale);
+  const dt = DASH_T[locale];
 
   const [loading, setLoading] = useState(true);
   const [stats, setStats]     = useState<Stats>({ total: 0, forSale: 0, forRent: 0, vip: 0, totalViews: 0 });
@@ -100,9 +107,9 @@ export default function DashboardPage() {
             <Link href="/admin/bat-dong-san" className="text-red-600 dark:text-red-400 text-sm hover:underline font-medium">{t.admin.manage} →</Link>
           </div>
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /><span className="text-sm">Đang tải...</span></div>
+            <div className="flex items-center justify-center py-8 text-gray-400"><Loader2 className="w-5 h-5 animate-spin mr-2" /><span className="text-sm">{dt.loading}</span></div>
           ) : recent.length === 0 ? (
-            <p className="text-sm text-gray-400 py-6 text-center">Chưa có tin đăng nào</p>
+            <p className="text-sm text-gray-400 py-6 text-center">{dt.noListings}</p>
           ) : (
             <div className="space-y-3">
               {recent.map(p => (
@@ -129,7 +136,7 @@ export default function DashboardPage() {
               {[1,2,3,4].map(i => <div key={i} className="h-5 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />)}
             </div>
           ) : Object.keys(byCat).length === 0 ? (
-            <p className="text-sm text-gray-400 py-6 text-center">Chưa có dữ liệu</p>
+            <p className="text-sm text-gray-400 py-6 text-center">{dt.noData}</p>
           ) : (
             <div className="space-y-3">
               {Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([cat, count]) => {
