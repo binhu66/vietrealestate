@@ -19,9 +19,31 @@ const COMMERCIAL_TYPE_MAP: Record<string, string> = {
   "khach-san": "other",
 };
 
+const PAGE_T = {
+  vi: {
+    all: "Tất cả", office: "Văn phòng", retail: "Mặt bằng", warehouse: "Kho, xưởng", hotel: "Khách sạn",
+    sub: "Văn phòng, mặt bằng, kho xưởng, khách sạn",
+    loading: "Đang tải bất động sản thương mại...",
+    empty: "Chưa có bất động sản thương mại",
+  },
+  en: {
+    all: "All", office: "Office", retail: "Retail Space", warehouse: "Warehouse", hotel: "Hotel",
+    sub: "Offices, retail spaces, warehouses, hotels",
+    loading: "Loading commercial properties...",
+    empty: "No commercial properties yet",
+  },
+  zh: {
+    all: "全部", office: "办公室", retail: "店面", warehouse: "仓库厂房", hotel: "酒店",
+    sub: "办公室、店面、仓库厂房、酒店",
+    loading: "加载商业地产中...",
+    empty: "暂无商业地产",
+  },
+};
+
 export default function ThuongMaiPage() {
   const { locale } = useLocale();
   const t = getT(locale);
+  const L = PAGE_T[locale] ?? PAGE_T.vi;
 
   const [listings, setListings] = useState<Property[]>(
     properties.filter(p => COMMERCIAL_CATEGORIES.includes(p.category))
@@ -53,11 +75,11 @@ export default function ThuongMaiPage() {
     : listings;
 
   const tabs = [
-    { id: "",          label: "Tất cả", icon: "🏢" },
-    { id: "van-phong", label: "Văn phòng", icon: "🏗️" },
-    { id: "mat-bang",  label: "Mặt bằng", icon: "🏪" },
-    { id: "kho-xuong", label: "Kho, xưởng", icon: "🏭" },
-    { id: "khach-san", label: "Khách sạn", icon: "🏨" },
+    { id: "",          label: L.all,       icon: "🏢" },
+    { id: "van-phong", label: L.office,    icon: "🏗️" },
+    { id: "mat-bang",  label: L.retail,    icon: "🏪" },
+    { id: "kho-xuong", label: L.warehouse, icon: "🏭" },
+    { id: "khach-san", label: L.hotel,     icon: "🏨" },
   ];
 
   return (
@@ -67,7 +89,7 @@ export default function ThuongMaiPage() {
       </div>
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-900">🏢 {t.nav.thuongMai}</h1>
-        <p className="text-gray-500 mt-1">Văn phòng, mặt bằng, kho xưởng, khách sạn</p>
+        <p className="text-gray-500 mt-1">{L.sub}</p>
       </div>
 
       {/* Sub-category tabs */}
@@ -91,12 +113,12 @@ export default function ThuongMaiPage() {
       {loading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <Loader2 className="w-7 h-7 animate-spin mr-3" />
-          <span>Đang tải bất động sản thương mại...</span>
+          <span>{L.loading}</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <div className="text-5xl mb-4">🏢</div>
-          <p>Chưa có bất động sản thương mại</p>
+          <p>{L.empty}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

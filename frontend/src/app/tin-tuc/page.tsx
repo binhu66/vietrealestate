@@ -12,6 +12,12 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Kiến thức": "bg-blue-50 text-blue-700",   "Knowledge": "bg-blue-50 text-blue-700",   "知识": "bg-blue-50 text-blue-700",
 };
 
+const PAGE_T = {
+  vi: { heading: "Tin tức & Thị trường", sub: "Cập nhật mới nhất về bất động sản Việt Nam", readMore: "Đọc thêm", minRead: "phút đọc", latest: "Mới nhất", subscribe: "Đăng ký nhận bản tin thị trường", subscribeDesc: "Nhận cập nhật thị trường BĐS Việt Nam hàng tuần. Không spam.", emailPlaceholder: "Địa chỉ email của bạn", btn: "Đăng ký", trends: "Xu hướng thị trường", buyerGuides: "Cẩm nang mua nhà", invest: "Phân tích đầu tư" },
+  en: { heading: "News & Market", sub: "Latest updates on Vietnam real estate", readMore: "Read more", minRead: "min read", latest: "Latest", subscribe: "Subscribe to Market Updates", subscribeDesc: "Weekly updates on Vietnam real estate market. No spam.", emailPlaceholder: "Your email address", btn: "Subscribe", trends: "Market Trends", buyerGuides: "Buyer Guides", invest: "Investment Analysis" },
+  zh: { heading: "新闻与市场", sub: "越南房地产最新动态", readMore: "阅读更多", minRead: "分钟", latest: "最新", subscribe: "订阅市场快讯", subscribeDesc: "每周接收越南房产市场最新动态，无垃圾邮件", emailPlaceholder: "您的邮箱地址", btn: "订阅", trends: "市场趋势", buyerGuides: "购房指南", invest: "投资分析" },
+};
+
 function formatDate(d: string, locale: string) {
   const date = new Date(d);
   if (locale === "en") return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -32,11 +38,7 @@ export default function TinTucPage() {
   const featured = articles.filter(a => a.featured);
   const rest = articles.filter(a => !a.featured);
 
-  const L = {
-    vi: { heading: "Tin tức & Thị trường", sub: "Cập nhật mới nhất về bất động sản Việt Nam", readMore: "Đọc thêm", minRead: "phút đọc", latest: "Mới nhất", subscribe: "Đăng ký nhận bản tin thị trường", subscribeDesc: "Nhận cập nhật thị trường BĐS Việt Nam hàng tuần. Không spam.", emailPlaceholder: "Địa chỉ email của bạn", btn: "Đăng ký" },
-    en: { heading: "News & Market", sub: "Latest updates on Vietnam real estate", readMore: "Read more", minRead: "min read", latest: "Latest", subscribe: "Subscribe to Market Updates", subscribeDesc: "Weekly updates on Vietnam real estate market. No spam.", emailPlaceholder: "Your email address", btn: "Subscribe" },
-    zh: { heading: "新闻与市场", sub: "越南房地产最新动态", readMore: "阅读更多", minRead: "分钟", latest: "最新", subscribe: "订阅市场快讯", subscribeDesc: "每周接收越南房产市场最新动态，无垃圾邮件", emailPlaceholder: "您的邮箱地址", btn: "订阅" },
-  }[locale] ?? { heading: "Tin tức & Thị trường", sub: "Cập nhật mới nhất về bất động sản Việt Nam", readMore: "Đọc thêm", minRead: "phút đọc", latest: "Mới nhất", subscribe: "Đăng ký nhận bản tin thị trường", subscribeDesc: "Nhận cập nhật thị trường BĐS Việt Nam hàng tuần. Không spam.", emailPlaceholder: "Địa chỉ email của bạn", btn: "Đăng ký" };
+  const L = PAGE_T[locale] ?? PAGE_T.vi;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -48,9 +50,9 @@ export default function TinTucPage() {
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-4 mb-10">
         {[
-          { icon: <TrendingUp className="w-5 h-5" />, label: locale === "zh" ? "市场趋势" : locale === "en" ? "Market Trends" : "Xu hướng thị trường", color: "text-red-600 bg-red-50" },
-          { icon: <Home className="w-5 h-5" />, label: locale === "zh" ? "购房指南" : locale === "en" ? "Buyer Guides" : "Cẩm nang mua nhà", color: "text-blue-600 bg-blue-50" },
-          { icon: <Building2 className="w-5 h-5" />, label: locale === "zh" ? "投资分析" : locale === "en" ? "Investment Analysis" : "Phân tích đầu tư", color: "text-green-600 bg-green-50" },
+          { icon: <TrendingUp className="w-5 h-5" />, label: L.trends, color: "text-red-600 bg-red-50" },
+          { icon: <Home className="w-5 h-5" />, label: L.buyerGuides, color: "text-blue-600 bg-blue-50" },
+          { icon: <Building2 className="w-5 h-5" />, label: L.invest, color: "text-green-600 bg-green-50" },
         ].map((item, i) => (
           <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.color}`}>{item.icon}</div>
