@@ -88,7 +88,7 @@ const vi = {
     password: "Mật khẩu",
     loginBtn: "Đăng nhập",
     logout: "Đăng xuất",
-    dashboardSubtitle: "Tổng quan hoạt động VietRealty",
+    dashboardSubtitle: "Tổng quan hoạt động BinHorizon",
     byCategory: "Phân bố theo loại",
     manageProp: "Quản lý BĐS",
     manageUsers: "Quản lý người dùng",

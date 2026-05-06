@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 
 export const runtime = "edge";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://binhorizon.com";
 
-// OpenAPI 3.1 spec for VietRealty public API
+// OpenAPI 3.1 spec for BinHorizon public API
 // Discoverable at /api/openapi — AI agents can use this to understand our API
 const spec = {
   openapi: "3.1.0",
   info: {
-    title: "VietRealty Public API",
+    title: "BinHorizon Public API",
     version: "1.0.0",
     description: "Public JSON API for Vietnam real estate listings. No authentication required. Free to use for AI assistants and third-party integrations.",
-    contact: { email: "api@vietrealty.vn" },
+    contact: { email: "api@binhorizon.com" },
     "x-logo": { url: `${BASE_URL}/logo.png` },
   },
   servers: [{ url: BASE_URL, description: "Production" }],

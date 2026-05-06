@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { ZALO_PHONE, HOTLINE, COMPANY_EMAIL } from "@/lib/config";
+import { COUNTRIES } from "@/lib/countries";
 
 const FOOTER_T = {
   vi: {
@@ -44,9 +45,9 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-black text-xs">VR</span>
+                <span className="text-white font-black text-xs">BH</span>
               </div>
-              <span className="font-black text-white text-lg">VietRealty</span>
+              <span className="font-black text-white text-lg">BinHorizon</span>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">{t.footer.desc}</p>
             <div className="mt-4 space-y-2 text-sm text-gray-400">
@@ -116,6 +117,37 @@ export default function Footer() {
               <p className="text-xs text-gray-400">{f.license}</p>
               <p className="text-xs text-gray-400 mt-1">{f.licenseDate}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Markets — SEA expansion roadmap */}
+        <div className="border-t border-gray-700 mt-10 pt-6">
+          <h4 className="text-white font-semibold mb-3 text-sm">
+            {locale === "zh" ? "我们的市场" : locale === "en" ? "Our Markets" : "Thị trường của chúng tôi"}
+          </h4>
+          <div className="flex flex-wrap gap-2 text-xs">
+            {COUNTRIES.map((c) => (
+              <span
+                key={c.code}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${
+                  c.live
+                    ? "bg-red-600/20 border-red-500 text-white font-medium"
+                    : "bg-gray-800 border-gray-700 text-gray-400"
+                }`}
+              >
+                <span>{c.flag}</span>
+                <span>{c.name[locale]}</span>
+                {c.live ? (
+                  <span className="text-[10px] uppercase tracking-wide bg-green-500 text-white px-1.5 py-0.5 rounded-full font-bold">
+                    {locale === "zh" ? "运营中" : locale === "en" ? "Live" : "Đang hoạt động"}
+                  </span>
+                ) : (
+                  <span className="text-[10px] uppercase tracking-wide bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">
+                    {locale === "zh" ? "敬请期待" : locale === "en" ? "Soon" : "Sắp ra mắt"}
+                  </span>
+                )}
+              </span>
+            ))}
           </div>
         </div>
 

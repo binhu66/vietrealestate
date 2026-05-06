@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "VietRealty - Bất động sản Việt Nam";
+export const alt = "BinHorizon - Bất động sản Việt Nam";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -47,7 +47,7 @@ export default function OGImage() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: 56, fontWeight: 900, color: "white", lineHeight: 1.1 }}>
-              VietRealty
+              BinHorizon
             </span>
             <span style={{ fontSize: 22, color: "rgba(255,255,255,0.8)" }}>
               Bất động sản Việt Nam

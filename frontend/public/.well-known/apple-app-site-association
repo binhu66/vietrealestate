@@ -3,12 +3,12 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAMID.vn.vietrealty.app",
+        "appID": "TEAMID.com.binhorizon.app",
         "paths": ["*"]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["TEAMID.vn.vietrealty.app"]
+    "apps": ["TEAMID.com.binhorizon.app"]
   }
 }

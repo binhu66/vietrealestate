@@ -4,8 +4,8 @@
 <dict>
   <key>com.apple.developer.associated-domains</key>
   <array>
-    <string>applinks:vietrealty.vn</string>
-    <string>applinks:www.vietrealty.vn</string>
+    <string>applinks:binhorizon.com</string>
+    <string>applinks:www.binhorizon.com</string>
     <string>applinks:vietrealestate.pages.dev</string>
   </array>
 </dict>

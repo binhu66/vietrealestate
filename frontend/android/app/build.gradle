@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "vn.vietrealty.app"
+    namespace = "com.binhorizon.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "vn.vietrealty.app"
+        applicationId "com.binhorizon.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

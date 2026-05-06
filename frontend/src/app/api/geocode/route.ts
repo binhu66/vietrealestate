@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=vn`,
       {
         headers: {
-          "User-Agent": "VietRealty/1.0 (condosmore66@gmail.com)",
+          "User-Agent": "BinHorizon/1.0 (condosmore66@gmail.com)",
           "Accept-Language": "vi,en",
         },
         signal: AbortSignal.timeout(8000),

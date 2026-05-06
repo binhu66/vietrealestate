@@ -8,7 +8,7 @@ import PropertyDetailClient from "./PropertyDetailClient";
 
 export const runtime = "edge";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://binhorizon.com";
 
 // UUID pattern check
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,19 +62,19 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await params;
   const p = await fetchProperty(id);
-  if (!p) return { title: "Không tìm thấy - VietRealty" };
+  if (!p) return { title: "Không tìm thấy - BinHorizon" };
 
   const price = formatPrice(p.price, p.priceUnit);
   const description = `${p.type === "ban" ? "Bán" : "Cho thuê"} ${p.area}m² tại ${p.district}, ${p.city}. Giá ${price}. ${p.description?.slice(0, 120)}`;
 
   return {
-    title: `${p.title} | VietRealty`,
+    title: `${p.title} | BinHorizon`,
     description,
     openGraph: {
       title: p.title,
       description,
       url: `${BASE_URL}/bat-dong-san/${p.id}`,
-      siteName: "VietRealty",
+      siteName: "BinHorizon",
       images: p.images[0] ? [{ url: p.images[0], width: 1200, height: 630, alt: p.title }] : [],
       locale: "vi_VN",
       type: "website",

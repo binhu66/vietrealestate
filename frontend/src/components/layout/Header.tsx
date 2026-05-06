@@ -2,21 +2,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, Globe, ChevronDown, LogOut, User } from "lucide-react";
+import { Menu, X, Globe, ChevronDown, LogOut, User, MapPin } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT, type Locale } from "@/i18n";
 import { useUser, signOut } from "@/lib/auth";
 import { ADMIN_EMAILS } from "@/lib/config";
+import { COUNTRIES, useCountry, type CountryCode } from "@/lib/countries";
 
 export default function Header() {
   const { locale, setLocale } = useLocale();
   const t = getT(locale);
   const router = useRouter();
   const { user, loading: authLoading } = useUser();
+  const { country, setCountry } = useCountry();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen]     = useState(false);
   const [userOpen, setUserOpen]     = useState(false);
+  const [countryOpen, setCountryOpen] = useState(false);
 
   const langs: { code: Locale; label: string; flag: string }[] = [
     { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
@@ -65,11 +68,11 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="w-9 h-9 bg-red-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-black text-sm">VR</span>
+            <span className="text-white font-black text-sm">BH</span>
           </div>
           <div className="leading-none">
-            <div className="font-black text-red-600 text-lg tracking-tight">VietRealty</div>
-            <div className="text-gray-400 text-[10px] leading-tight">{locale === "zh" ? "房产" : locale === "en" ? "Real Estate" : "Bất động sản"}</div>
+            <div className="font-black text-red-600 text-lg tracking-tight">BinHorizon</div>
+            <div className="text-gray-400 text-[10px] leading-tight">{locale === "zh" ? "越南房产" : locale === "en" ? "Vietnam Real Estate" : "Bất động sản Việt Nam"}</div>
           </div>
         </Link>
 
@@ -88,10 +91,53 @@ export default function Header() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Country switcher (SEA expansion roadmap) */}
+          <div className="relative">
+            <button
+              onClick={() => { setCountryOpen(!countryOpen); setLangOpen(false); setUserOpen(false); }}
+              className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md"
+              aria-label="Select country"
+            >
+              <MapPin className="w-4 h-4" />
+              <span className="hidden sm:inline">{COUNTRIES.find((c) => c.code === country)?.flag}</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {countryOpen && (
+              <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-56 z-50 max-h-96 overflow-y-auto">
+                {COUNTRIES.map((c) => {
+                  const disabled = !c.live;
+                  return (
+                    <button
+                      key={c.code}
+                      onClick={() => { if (!disabled) { setCountry(c.code); setCountryOpen(false); } }}
+                      disabled={disabled}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
+                        disabled
+                          ? "text-gray-400 cursor-not-allowed"
+                          : country === c.code
+                            ? "text-red-600 font-semibold hover:bg-gray-50"
+                            : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{c.flag}</span>
+                      <span className="flex-1 text-left">{c.name[locale]}</span>
+                      {country === c.code && <span className="text-red-600">✓</span>}
+                      {disabled && (
+                        <span className="text-[10px] uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                          {locale === "zh" ? "敬请期待" : locale === "en" ? "Soon" : "Sắp ra mắt"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Lang switcher */}
           <div className="relative">
             <button
-              onClick={() => { setLangOpen(!langOpen); setUserOpen(false); }}
+              onClick={() => { setLangOpen(!langOpen); setUserOpen(false); setCountryOpen(false); }}
               className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md"
             >
               <Globe className="w-4 h-4" />

@@ -18,13 +18,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Android App Links — deep-link from https://vietrealty.vn/* into the app -->
+            <!-- Android App Links — deep-link from https://binhorizon.com/* into the app -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="vietrealty.vn" />
-                <data android:scheme="https" android:host="www.vietrealty.vn" />
+                <data android:scheme="https" android:host="binhorizon.com" />
+                <data android:scheme="https" android:host="www.binhorizon.com" />
             </intent-filter>
         </activity>
 

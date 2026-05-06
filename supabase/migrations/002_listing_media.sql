@@ -1,4 +1,4 @@
--- VietRealty: listing_media table
+-- BinHorizon: listing_media table
 -- Decoupled photo storage — allows async upload and Supabase Storage integration
 
 create table listing_media (

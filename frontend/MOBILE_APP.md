@@ -1,13 +1,13 @@
-# VietRealty Mobile App (Capacitor)
+# BinHorizon Mobile App (Capacitor)
 
-Native iOS + Android shells that load the live web app at https://vietrealty.vn.
+Native iOS + Android shells that load the live web app at https://binhorizon.com.
 
 ## Architecture
 
 - **Web layer**: existing Next.js app on Cloudflare Pages (no changes needed)
 - **Native shell**: Capacitor wraps a WKWebView (iOS) / WebView (Android) pointing at the production URL via `capacitor.config.ts → server.url`
-- **Deep links**: iOS Universal Links (`apple-app-site-association`) + Android App Links (`assetlinks.json`) route `https://vietrealty.vn/*` URLs into the app
-- **Bundle ID**: `vn.vietrealty.app` (matches AASA `appID` and Android `package_name`)
+- **Deep links**: iOS Universal Links (`apple-app-site-association`) + Android App Links (`assetlinks.json`) route `https://binhorizon.com/*` URLs into the app
+- **Bundle ID**: `com.binhorizon.app` (matches AASA `appID` and Android `package_name`)
 
 ## Project Layout
 
@@ -16,7 +16,7 @@ frontend/
 ├── capacitor.config.ts        # appId, server URL, splash, status bar
 ├── ios/                       # Xcode project — open with `npx cap open ios`
 │   └── App/App/
-│       ├── App.entitlements   # Associated Domains (vietrealty.vn)
+│       ├── App.entitlements   # Associated Domains (binhorizon.com)
 │       └── Assets.xcassets/   # icon + splash (auto-generated)
 ├── android/                   # Android Studio project — open with `npx cap open android`
 │   └── app/src/main/
@@ -43,21 +43,21 @@ npx capacitor-assets generate \
 
 ## Universal / App Links
 
-iOS — `public/.well-known/apple-app-site-association` (already deployed at https://vietrealty.vn/.well-known/apple-app-site-association):
+iOS — `public/.well-known/apple-app-site-association` (already deployed at https://binhorizon.com/.well-known/apple-app-site-association):
 ```json
-{ "applinks": { "details": [{ "appID": "TEAMID.vn.vietrealty.app", "paths": ["*"] }] } }
+{ "applinks": { "details": [{ "appID": "TEAMID.com.binhorizon.app", "paths": ["*"] }] } }
 ```
 Replace `TEAMID` with your real Apple Developer Team ID once known.
 
 Android — `public/.well-known/assetlinks.json`:
 ```json
 [{ "relation": ["delegate_permission/common.handle_all_urls"],
-   "target": { "namespace": "android_app", "package_name": "vn.vietrealty.app",
+   "target": { "namespace": "android_app", "package_name": "com.binhorizon.app",
                "sha256_cert_fingerprints": ["…"] } }]
 ```
 Replace `REPLACE_WITH_RELEASE_KEYSTORE_SHA256_FINGERPRINT` after generating your release keystore:
 ```bash
-keytool -list -v -keystore ~/release.keystore -alias vietrealty | grep SHA256
+keytool -list -v -keystore ~/release.keystore -alias binhorizon | grep SHA256
 ```
 
 ## App Store Risk
@@ -85,6 +85,6 @@ npx cap open android
 - [ ] Replace `TEAMID` in AASA with real Apple Team ID
 - [ ] Generate release keystore + replace SHA256 placeholder in `assetlinks.json`
 - [ ] Add `@capacitor/push-notifications` (mitigates App Store 4.2 risk)
-- [ ] Apple Developer Portal: register App ID `vn.vietrealty.app` with Associated Domains capability
+- [ ] Apple Developer Portal: register App ID `com.binhorizon.app` with Associated Domains capability
 - [ ] Google Play Console: create app entry, upload first AAB
 - [ ] Splash screen branding pass (current is plain VR red — designer review)

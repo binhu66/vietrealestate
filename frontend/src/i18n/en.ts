@@ -90,7 +90,7 @@ const en: Translations = {
     password: "Password",
     loginBtn: "Login",
     logout: "Logout",
-    dashboardSubtitle: "VietRealty activity overview",
+    dashboardSubtitle: "BinHorizon activity overview",
     byCategory: "By Category",
     manageProp: "Manage Properties",
     manageUsers: "Manage Users",

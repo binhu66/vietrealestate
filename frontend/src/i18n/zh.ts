@@ -90,7 +90,7 @@ const zh: Translations = {
     password: "密码",
     loginBtn: "登录",
     logout: "退出",
-    dashboardSubtitle: "VietRealty运营概览",
+    dashboardSubtitle: "BinHorizon运营概览",
     byCategory: "按类型分布",
     manageProp: "房源管理",
     manageUsers: "用户管理",

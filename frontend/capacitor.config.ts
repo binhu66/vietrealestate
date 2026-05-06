@@ -1,13 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'vn.vietrealty.app',
-  appName: 'VietRealty',
+  appId: 'com.binhorizon.app',
+  appName: 'BinHorizon',
   webDir: 'public', // placeholder; we use server.url for live remote
   server: {
     // Loads the live web app inside the native shell.
     // Switch to a static-bundled build later if App Store rejects "wrapper" apps.
-    url: 'https://vietrealty.vn',
+    url: 'https://binhorizon.com',
     cleartext: false,
     androidScheme: 'https',
   },

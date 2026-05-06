@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <span className="font-black text-xs text-white">VR</span>
                     </div>
                     <div>
-                      <div className="font-black text-sm text-gray-900 dark:text-white">VietRealty</div>
+                      <div className="font-black text-sm text-gray-900 dark:text-white">BinHorizon</div>
                       <div className="text-gray-400 text-[10px]">Admin Panel</div>
                     </div>
                   </Link>

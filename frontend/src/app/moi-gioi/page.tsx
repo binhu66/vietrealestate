@@ -203,7 +203,7 @@ export default function MoiGioiPage() {
           {locale === "zh" ? "您是中介吗？" : locale === "en" ? "Are you an agent?" : "Bạn là môi giới?"}
         </h3>
         <p className="text-red-100 text-sm mb-5 max-w-md mx-auto">
-          {locale === "zh" ? "注册成为VietRealty认证中介，获得更多曝光" : locale === "en" ? "Register as a VietRealty verified agent and reach more buyers" : "Đăng ký làm môi giới xác minh trên VietRealty để tiếp cận nhiều khách hàng hơn"}
+          {locale === "zh" ? "注册成为BinHorizon认证中介，获得更多曝光" : locale === "en" ? "Register as a BinHorizon verified agent and reach more buyers" : "Đăng ký làm môi giới xác minh trên BinHorizon để tiếp cận nhiều khách hàng hơn"}
         </p>
         <Link href="/dang-ky" className="inline-block bg-white text-red-600 font-bold px-6 py-3 rounded-xl hover:bg-red-50 transition-colors">
           {locale === "zh" ? "立即注册" : locale === "en" ? "Register now" : "Đăng ký ngay"}

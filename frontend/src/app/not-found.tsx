@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Không tìm thấy trang | VietRealty",
+  title: "Không tìm thấy trang | BinHorizon",
 };
 
 export default function NotFound() {
@@ -14,7 +14,7 @@ export default function NotFound() {
         <h1 className="text-2xl font-black text-gray-900 mb-3">Trang không tồn tại</h1>
         <p className="text-gray-500 mb-8 leading-relaxed">
           Trang bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.<br />
-          Hãy thử tìm bất động sản phù hợp trên VietRealty.
+          Hãy thử tìm bất động sản phù hợp trên BinHorizon.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link

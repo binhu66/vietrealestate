@@ -1,4 +1,4 @@
--- VietRealty: user profiles, favorites, saved searches
+-- BinHorizon: user profiles, favorites, saved searches
 
 -- ── profiles ──────────────────────────────────────────────
 -- Mirrors auth.users 1:1; created by trigger on auth.users insert

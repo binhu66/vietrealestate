@@ -5,9 +5,9 @@
     <rect x="-360" y="-360" width="720" height="720" rx="140" fill="#FFFFFF"/>
     <text x="0" y="120" text-anchor="middle"
           font-family="Inter, -apple-system, system-ui, Helvetica, sans-serif"
-          font-weight="900" font-size="380" fill="#DC2626" letter-spacing="-12">VR</text>
+          font-weight="900" font-size="380" fill="#DC2626" letter-spacing="-12">BH</text>
     <text x="0" y="280" text-anchor="middle"
           font-family="Inter, -apple-system, system-ui, Helvetica, sans-serif"
-          font-weight="700" font-size="92" fill="#DC2626" letter-spacing="6">VietRealty</text>
+          font-weight="700" font-size="92" fill="#DC2626" letter-spacing="6">BinHorizon</text>
   </g>
 </svg>

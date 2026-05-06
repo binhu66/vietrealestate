@@ -6,7 +6,7 @@ import ArticleContent from "./ArticleContent";
 
 export const runtime = "edge";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://binhorizon.com";
 
 function getSupabase() {
   return createClient(
@@ -25,7 +25,7 @@ export async function generateMetadata(
   const staticArticle = articles.find(a => a.slug === slug);
   if (staticArticle) {
     return {
-      title: `${staticArticle.title} | VietRealty`,
+      title: `${staticArticle.title} | BinHorizon`,
       description: staticArticle.excerpt,
       openGraph: {
         title: staticArticle.title,
@@ -50,7 +50,7 @@ export async function generateMetadata(
 
     if (data) {
       return {
-        title: `${data.title} | VietRealty Tin tức`,
+        title: `${data.title} | BinHorizon Tin tức`,
         description: data.excerpt ?? undefined,
         openGraph: {
           title: data.title,
@@ -65,7 +65,7 @@ export async function generateMetadata(
     }
   } catch { /* fallthrough */ }
 
-  return { title: "Tin tức | VietRealty" };
+  return { title: "Tin tức | BinHorizon" };
 }
 
 export default async function ArticlePage(

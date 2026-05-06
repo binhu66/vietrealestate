@@ -1,4 +1,4 @@
-package vn.vietrealty.app;
+package com.binhorizon.app;
 
 import com.getcapacitor.BridgeActivity;
 

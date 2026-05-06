@@ -1,4 +1,4 @@
--- VietRealty: listings table
+-- BinHorizon: listings table
 -- Inspired by yorkbbs0405 RESO/TRREB schema, adapted for Vietnam real estate market
 -- Field naming: RESO-aligned snake_case where applicable, Vietnam-specific fields added
 

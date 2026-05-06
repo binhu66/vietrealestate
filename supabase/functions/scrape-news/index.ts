@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
   for (const source of RSS_SOURCES) {
     try {
       const res = await fetch(source.url, {
-        headers: { "User-Agent": "VietRealty-NewsBot/1.0 (+https://vietrealty.vn/tin-tuc)" },
+        headers: { "User-Agent": "BinHorizon-NewsBot/1.0 (+https://binhorizon.com/tin-tuc)" },
         signal: AbortSignal.timeout(10000),
       });
 

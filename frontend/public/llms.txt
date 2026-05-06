@@ -1,8 +1,8 @@
-# VietRealty – Vietnam Real Estate Marketplace
-# https://vietrealty.vn
+# BinHorizon – Vietnam Real Estate Marketplace
+# https://binhorizon.com
 # llms.txt — machine-readable site guide for AI language models
 
-> VietRealty is Vietnam's leading real estate listing platform for buying, selling,
+> BinHorizon is Vietnam's leading real estate listing platform for buying, selling,
 > and renting properties including apartments (căn hộ chung cư), houses (nhà riêng/nhà phố),
 > villas (biệt thự), land plots (đất nền), and commercial spaces (bất động sản thương mại).
 
