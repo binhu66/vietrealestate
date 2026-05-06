@@ -2,6 +2,133 @@
 import { useState, useMemo } from "react";
 import { Wand2, Loader2, Check, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useLocale } from "@/lib/locale";
+
+const PARSER_T = {
+  vi: {
+    buttonOpen: "Nhận diện tin đăng AI",
+    title: "Nhận diện tin đăng AI",
+    subtitle: "Dán nội dung tin, tự động trích xuất giá / diện tích / phòng / địa chỉ / liên hệ",
+    sourceLabel: "Nội dung tin gốc",
+    placeholder: `Dán nội dung tin — vừa nhập vừa hiển thị kết quả nhận diện bên phải
+
+Ví dụ:
+Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Giá 5.2 tỷ. View sông tuyệt đẹp, nội thất cao cấp. Liên hệ A. Tuấn 0901234567`,
+    charSuffix: "ký tự · tự động nhận diện khi nhập",
+    resultLabel: "Kết quả nhận diện (có thể chỉnh sửa)",
+    placeholderHint: "Dán nội dung tin ở bên trái...",
+    fTitle: "Tiêu đề",
+    fTransaction: "Giao dịch",
+    fType: "Loại",
+    fPrice: "Giá",
+    fArea: "Diện tích m²",
+    fBedrooms: "Phòng ngủ",
+    fBathrooms: "Phòng tắm",
+    fAddress: "Địa chỉ",
+    fDistrict: "Quận/Huyện",
+    fCity: "Tỉnh/TP",
+    fContactName: "Liên hệ",
+    fPhone: "Điện thoại",
+    optBan: "Bán",
+    optThue: "Cho thuê",
+    catApartment: "Căn hộ",
+    catHouse: "Nhà riêng",
+    catVilla: "Biệt thự",
+    catLand: "Đất nền",
+    catOffice: "Văn phòng",
+    catShop: "Mặt bằng",
+    catWarehouse: "Kho xưởng",
+    catHotel: "Khách sạn",
+    btnSaveOk: "Đã lưu!",
+    btnSaving: "Đang lưu...",
+    btnSave: "Xác nhận lưu vào CSDL",
+    needPriceArea: "Cần ít nhất giá và diện tích để lưu",
+    defaultTitle: "Tin đăng mới",
+    errFallback: "Lỗi",
+  },
+  en: {
+    buttonOpen: "AI listing parser",
+    title: "AI listing parser",
+    subtitle: "Paste a listing — auto-extract price / area / rooms / address / contact",
+    sourceLabel: "Listing source",
+    placeholder: `Paste listing text — results show on the right as you type
+
+Example:
+Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Giá 5.2 tỷ. View sông tuyệt đẹp, nội thất cao cấp. Liên hệ A. Tuấn 0901234567`,
+    charSuffix: "chars · auto-parsing as you type",
+    resultLabel: "Parsed (editable)",
+    placeholderHint: "Paste listing text on the left...",
+    fTitle: "Title",
+    fTransaction: "Deal",
+    fType: "Type",
+    fPrice: "Price",
+    fArea: "Area m²",
+    fBedrooms: "Bedrooms",
+    fBathrooms: "Bathrooms",
+    fAddress: "Address",
+    fDistrict: "District",
+    fCity: "City",
+    fContactName: "Contact",
+    fPhone: "Phone",
+    optBan: "For sale",
+    optThue: "For rent",
+    catApartment: "Apartment",
+    catHouse: "House",
+    catVilla: "Villa",
+    catLand: "Land",
+    catOffice: "Office",
+    catShop: "Shophouse",
+    catWarehouse: "Warehouse",
+    catHotel: "Hotel",
+    btnSaveOk: "Saved!",
+    btnSaving: "Saving...",
+    btnSave: "Save to database",
+    needPriceArea: "Price and area required to save",
+    defaultTitle: "New listing",
+    errFallback: "Error",
+  },
+  zh: {
+    buttonOpen: "智能识别房源",
+    title: "智能识别房源",
+    subtitle: "粘贴房源描述,自动提取价格 / 面积 / 户型 / 地址 / 联系方式",
+    sourceLabel: "房源原文",
+    placeholder: `粘贴房源内容 — 边输入,右侧实时显示识别结果
+
+例如:
+Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Giá 5.2 tỷ. View sông tuyệt đẹp, nội thất cao cấp. Liên hệ A. Tuấn 0901234567`,
+    charSuffix: "字符 · 输入时自动识别",
+    resultLabel: "识别结果(可编辑)",
+    placeholderHint: "在左侧粘贴房源内容...",
+    fTitle: "标题",
+    fTransaction: "交易",
+    fType: "类型",
+    fPrice: "价格",
+    fArea: "面积 m²",
+    fBedrooms: "卧室",
+    fBathrooms: "浴室",
+    fAddress: "地址",
+    fDistrict: "区/县",
+    fCity: "省/市",
+    fContactName: "联系人",
+    fPhone: "电话",
+    optBan: "出售",
+    optThue: "出租",
+    catApartment: "公寓",
+    catHouse: "独立屋",
+    catVilla: "别墅",
+    catLand: "地块",
+    catOffice: "写字楼",
+    catShop: "商铺",
+    catWarehouse: "仓库",
+    catHotel: "酒店",
+    btnSaveOk: "保存成功!",
+    btnSaving: "保存中...",
+    btnSave: "确认保存到数据库",
+    needPriceArea: "需要至少填入价格和面积才能保存",
+    defaultTitle: "新房源",
+    errFallback: "错误",
+  },
+};
 
 const CATEGORY_TO_TYPE: Record<string, string> = {
   "can-ho-chung-cu": "apartment",
@@ -176,6 +303,8 @@ function parse(text: string): Parsed {
 
 // ── Component ──────────────────────────────────────────────────────────────
 export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
+  const { locale } = useLocale();
+  const T = PARSER_T[locale as keyof typeof PARSER_T] ?? PARSER_T.vi;
   const [open,    setOpen]    = useState(false);
   const [text,    setText]    = useState("");
   const [edits,   setEdits]   = useState<Partial<Parsed>>({});
@@ -209,7 +338,7 @@ export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
         transaction_type:    parsed.transactionType === "ban" ? "For Sale" : "For Rent",
         property_type:       CATEGORY_TO_TYPE[parsed.category] ?? "other",
         category:            parsed.category,
-        title:               parsed.title || "Tin đăng mới",
+        title:               parsed.title || T.defaultTitle,
         list_price:          toVND(parsed.price, parsed.priceUnit),
         price_unit:          "vnd",
         building_area_total: parsed.area || null,
@@ -236,7 +365,7 @@ export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
         onSaved?.();
       }, 1500);
     } catch (e: any) {
-      setError(e.message ?? "Lỗi");
+      setError(e.message ?? T.errFallback);
     } finally {
       setSaving(false);
     }
@@ -249,7 +378,7 @@ export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
         className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-sm"
       >
         <Wand2 className="w-4 h-4" />
-        智能识别房源
+        {T.buttonOpen}
       </button>
     );
   }
@@ -262,8 +391,8 @@ export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
             <Wand2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 dark:text-white">智能识别房源</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">粘贴房源描述，自动提取价格 / 面积 / 户型 / 地址 / 联系方式</p>
+            <h3 className="font-bold text-gray-900 dark:text-white">{T.title}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{T.subtitle}</p>
           </div>
         </div>
         <button onClick={() => { setOpen(false); setText(""); setEdits({}); setError(""); }} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
@@ -274,49 +403,46 @@ export default function AIListingParser({ onSaved }: { onSaved?: () => void }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: input textarea */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">房源原文</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">{T.sourceLabel}</label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={`粘贴房源内容 — 边输入，右侧实时显示识别结果
-
-例如：
-Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Giá 5.2 tỷ. View sông tuyệt đẹp, nội thất cao cấp. Liên hệ A. Tuấn 0901234567`}
+            placeholder={T.placeholder}
             rows={14}
             className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none font-mono"
           />
-          <div className="text-xs text-gray-400">{text.length} 字符 · 输入时自动识别</div>
+          <div className="text-xs text-gray-400">{text.length} {T.charSuffix}</div>
         </div>
 
         {/* Right: live extracted preview */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">识别结果（可编辑）</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-400">{T.resultLabel}</label>
           <div className={`bg-gray-50 dark:bg-gray-800 border rounded-xl p-4 space-y-3 ${hasResult ? "border-green-300 dark:border-green-700" : "border-gray-200 dark:border-gray-700"}`}>
             {!hasResult && (
-              <p className="text-sm text-gray-400 text-center py-6">在左侧粘贴房源内容...</p>
+              <p className="text-sm text-gray-400 text-center py-6">{T.placeholderHint}</p>
             )}
             {hasResult && (
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Field label="标题" value={parsed.title} onChange={v => update("title", v)} colSpan={2} highlight={!!parse(text).title} />
-                <Field label="交易">
+                <Field label={T.fTitle} value={parsed.title} onChange={v => update("title", v)} colSpan={2} highlight={!!parse(text).title} />
+                <Field label={T.fTransaction}>
                   <select value={parsed.transactionType} onChange={e => update("transactionType", e.target.value as any)} className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
-                    <option value="ban">出售</option>
-                    <option value="thue">出租</option>
+                    <option value="ban">{T.optBan}</option>
+                    <option value="thue">{T.optThue}</option>
                   </select>
                 </Field>
-                <Field label="类型">
+                <Field label={T.fType}>
                   <select value={parsed.category} onChange={e => update("category", e.target.value)} className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm">
-                    <option value="can-ho-chung-cu">公寓</option>
-                    <option value="nha-rieng">独立屋</option>
-                    <option value="nha-biet-thu">别墅</option>
-                    <option value="dat-nen">地块</option>
-                    <option value="van-phong">写字楼</option>
-                    <option value="mat-bang">商铺</option>
-                    <option value="kho-xuong">仓库</option>
-                    <option value="khach-san">酒店</option>
+                    <option value="can-ho-chung-cu">{T.catApartment}</option>
+                    <option value="nha-rieng">{T.catHouse}</option>
+                    <option value="nha-biet-thu">{T.catVilla}</option>
+                    <option value="dat-nen">{T.catLand}</option>
+                    <option value="van-phong">{T.catOffice}</option>
+                    <option value="mat-bang">{T.catShop}</option>
+                    <option value="kho-xuong">{T.catWarehouse}</option>
+                    <option value="khach-san">{T.catHotel}</option>
                   </select>
                 </Field>
-                <Field label="价格" highlight={parsed.price > 0}>
+                <Field label={T.fPrice} highlight={parsed.price > 0}>
                   <div className="flex gap-1">
                     <input type="number" value={parsed.price || ""} onChange={e => update("price", parseFloat(e.target.value) || 0)} className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm" />
                     <select value={parsed.priceUnit} onChange={e => update("priceUnit", e.target.value as any)} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm">
@@ -327,14 +453,14 @@ Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Gi�
                     </select>
                   </div>
                 </Field>
-                <Field label="面积 m²" type="number" value={parsed.area ? String(parsed.area) : ""} onChange={v => update("area", parseFloat(v) || 0)} highlight={parsed.area > 0} />
-                <Field label="卧室" type="number" value={parsed.bedrooms?.toString() ?? ""} onChange={v => update("bedrooms", v ? parseInt(v) : null)} highlight={parsed.bedrooms != null} />
-                <Field label="浴室" type="number" value={parsed.bathrooms?.toString() ?? ""} onChange={v => update("bathrooms", v ? parseInt(v) : null)} highlight={parsed.bathrooms != null} />
-                <Field label="地址" value={parsed.address} onChange={v => update("address", v)} colSpan={2} highlight={!!parsed.address} />
-                <Field label="区/县" value={parsed.district} onChange={v => update("district", v)} highlight={!!parsed.district} />
-                <Field label="省/市" value={parsed.city} onChange={v => update("city", v)} highlight={!!parsed.city} />
-                <Field label="联系人" value={parsed.contactName} onChange={v => update("contactName", v)} highlight={!!parsed.contactName} />
-                <Field label="电话" value={parsed.contactPhone} onChange={v => update("contactPhone", v)} highlight={!!parsed.contactPhone} />
+                <Field label={T.fArea} type="number" value={parsed.area ? String(parsed.area) : ""} onChange={v => update("area", parseFloat(v) || 0)} highlight={parsed.area > 0} />
+                <Field label={T.fBedrooms} type="number" value={parsed.bedrooms?.toString() ?? ""} onChange={v => update("bedrooms", v ? parseInt(v) : null)} highlight={parsed.bedrooms != null} />
+                <Field label={T.fBathrooms} type="number" value={parsed.bathrooms?.toString() ?? ""} onChange={v => update("bathrooms", v ? parseInt(v) : null)} highlight={parsed.bathrooms != null} />
+                <Field label={T.fAddress} value={parsed.address} onChange={v => update("address", v)} colSpan={2} highlight={!!parsed.address} />
+                <Field label={T.fDistrict} value={parsed.district} onChange={v => update("district", v)} highlight={!!parsed.district} />
+                <Field label={T.fCity} value={parsed.city} onChange={v => update("city", v)} highlight={!!parsed.city} />
+                <Field label={T.fContactName} value={parsed.contactName} onChange={v => update("contactName", v)} highlight={!!parsed.contactName} />
+                <Field label={T.fPhone} value={parsed.contactPhone} onChange={v => update("contactPhone", v)} highlight={!!parsed.contactPhone} />
               </div>
             )}
           </div>
@@ -355,10 +481,10 @@ Bán căn hộ 2PN 75m² tại Vinhomes Central Park, Bình Thạnh, TP.HCM. Gi�
             className="flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : success ? <Check className="w-4 h-4" /> : null}
-            {success ? "保存成功!" : saving ? "保存中..." : "确认保存到数据库"}
+            {success ? T.btnSaveOk : saving ? T.btnSaving : T.btnSave}
           </button>
           {(!parsed.area || !parsed.price) && (
-            <span className="text-xs text-amber-600 dark:text-amber-400">需要至少填入价格和面积才能保存</span>
+            <span className="text-xs text-amber-600 dark:text-amber-400">{T.needPriceArea}</span>
           )}
         </div>
       )}

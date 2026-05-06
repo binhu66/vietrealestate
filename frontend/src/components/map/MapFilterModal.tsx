@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { categories } from "@/lib/data";
+import { useLocale } from "@/lib/locale";
 
 export interface MapFilters {
   priceMin?: number;
@@ -13,6 +14,69 @@ export interface MapFilters {
 }
 
 export const EMPTY_FILTERS: MapFilters = { categoryIds: [] };
+
+const FILTER_T = {
+  vi: {
+    title: "Điều kiện lọc",
+    tabPrice: "Giá",
+    tabType: "Loại BĐS",
+    tabRooms: "Phòng ngủ",
+    tabMore: "Thêm",
+    customPrice: "Tự chỉnh giá",
+    priceRange: "Khoảng giá",
+    propertyType: "Loại bất động sản",
+    minBedrooms: "Số phòng ngủ tối thiểu",
+    area: "Diện tích",
+    placeholderMin: "Thấp nhất",
+    placeholderMax: "Cao nhất",
+    placeholderAreaMin: "Tối thiểu",
+    placeholderAreaMax: "Tối đa",
+    reset: "Đặt lại",
+    apply: "Xác nhận",
+    unitTy: "tỷ",
+    unitTrPerMonth: "tr/th",
+  },
+  en: {
+    title: "Filters",
+    tabPrice: "Price",
+    tabType: "Type",
+    tabRooms: "Bedrooms",
+    tabMore: "More",
+    customPrice: "Custom price",
+    priceRange: "Price range",
+    propertyType: "Property type",
+    minBedrooms: "Min bedrooms",
+    area: "Area",
+    placeholderMin: "Min",
+    placeholderMax: "Max",
+    placeholderAreaMin: "Min",
+    placeholderAreaMax: "Max",
+    reset: "Reset",
+    apply: "Apply",
+    unitTy: "bn",
+    unitTrPerMonth: "M/mo",
+  },
+  zh: {
+    title: "筛选条件",
+    tabPrice: "价格",
+    tabType: "房产类型",
+    tabRooms: "卧室",
+    tabMore: "更多",
+    customPrice: "自定义价格",
+    priceRange: "价格区间",
+    propertyType: "房产类型",
+    minBedrooms: "最少卧室",
+    area: "面积",
+    placeholderMin: "最低",
+    placeholderMax: "最高",
+    placeholderAreaMin: "最小",
+    placeholderAreaMax: "最大",
+    reset: "重置",
+    apply: "确认",
+    unitTy: "亿",
+    unitTrPerMonth: "百万/月",
+  },
+};
 
 const PRICE_RANGES_BAN = [
   { label: "≤1 tỷ",   min: 0,  max: 1   },
@@ -49,6 +113,8 @@ interface Props {
 }
 
 export default function MapFilterModal({ open, onClose, listingTab, filters, onChange }: Props) {
+  const { locale } = useLocale();
+  const T = FILTER_T[locale as keyof typeof FILTER_T] ?? FILTER_T.vi;
   const [tab, setTab] = useState<Tab>("price");
   const [local, setLocal] = useState<MapFilters>({ ...filters });
 
@@ -91,13 +157,13 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
   if (!open) return null;
 
   const priceRanges = listingTab === "thue" ? PRICE_RANGES_THUE : PRICE_RANGES_BAN;
-  const priceUnit   = listingTab === "thue" ? "tr/th" : "tỷ";
+  const priceUnit   = listingTab === "thue" ? T.unitTrPerMonth : T.unitTy;
 
   const TABS: { id: Tab; label: string }[] = [
-    { id: "price", label: "Giá" },
-    { id: "type",  label: "Loại BĐS" },
-    { id: "rooms", label: "Phòng ngủ" },
-    { id: "more",  label: "Thêm" },
+    { id: "price", label: T.tabPrice },
+    { id: "type",  label: T.tabType },
+    { id: "rooms", label: T.tabRooms },
+    { id: "more",  label: T.tabMore },
   ];
 
   return (
@@ -107,7 +173,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h3 className="font-bold text-gray-900 text-base">Điều kiện lọc</h3>
+          <h3 className="font-bold text-gray-900 text-base">{T.title}</h3>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-gray-600" />
           </button>
@@ -132,17 +198,17 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
           {/* ——— PRICE ——— */}
           {tab === "price" && <>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Tự chỉnh giá ({priceUnit})</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.customPrice} ({priceUnit})</p>
               <div className="flex items-center gap-2">
                 <input
-                  type="number" min="0" placeholder="Thấp nhất"
+                  type="number" min="0" placeholder={T.placeholderMin}
                   value={local.priceMin ?? ""}
                   onChange={e => patch({ priceMin: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
                 <span className="text-gray-400 text-sm">—</span>
                 <input
-                  type="number" min="0" placeholder="Cao nhất"
+                  type="number" min="0" placeholder={T.placeholderMax}
                   value={local.priceMax ?? ""}
                   onChange={e => patch({ priceMax: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -150,7 +216,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Khoảng giá</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.priceRange}</p>
               <div className="grid grid-cols-3 gap-2">
                 {priceRanges.map(r => (
                   <button
@@ -168,7 +234,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
           {/* ——— TYPE ——— */}
           {tab === "type" && <>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Loại bất động sản</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.propertyType}</p>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map(c => (
                   <button
@@ -187,7 +253,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
           {/* ——— ROOMS ——— */}
           {tab === "rooms" && <>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Số phòng ngủ tối thiểu</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.minBedrooms}</p>
               <div className="flex gap-2">
                 {BEDROOMS.map(b => {
                   const val = b === "5+" ? 5 : (b as number);
@@ -204,7 +270,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Diện tích (m²)</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.area} (m²)</p>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {AREA_PRESETS.map(r => (
                   <button
@@ -218,14 +284,14 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
               </div>
               <div className="flex items-center gap-2">
                 <input
-                  type="number" min="0" placeholder="Tối thiểu"
+                  type="number" min="0" placeholder={T.placeholderAreaMin}
                   value={local.areaMin ?? ""}
                   onChange={e => patch({ areaMin: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
                 <span className="text-gray-400">—</span>
                 <input
-                  type="number" min="0" placeholder="Tối đa"
+                  type="number" min="0" placeholder={T.placeholderAreaMax}
                   value={local.areaMax ?? ""}
                   onChange={e => patch({ areaMax: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -238,17 +304,17 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
           {/* ——— MORE ——— */}
           {tab === "more" && <>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Diện tích (m²)</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.area} (m²)</p>
               <div className="flex items-center gap-2">
                 <input
-                  type="number" min="0" placeholder="Tối thiểu"
+                  type="number" min="0" placeholder={T.placeholderAreaMin}
                   value={local.areaMin ?? ""}
                   onChange={e => patch({ areaMin: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
                 <span className="text-gray-400">—</span>
                 <input
-                  type="number" min="0" placeholder="Tối đa"
+                  type="number" min="0" placeholder={T.placeholderAreaMax}
                   value={local.areaMax ?? ""}
                   onChange={e => patch({ areaMax: e.target.value ? +e.target.value : undefined })}
                   className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -257,7 +323,7 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
               </div>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Số phòng ngủ tối thiểu</p>
+              <p className="text-sm font-semibold text-gray-700 mb-2">{T.minBedrooms}</p>
               <div className="flex gap-2">
                 {BEDROOMS.map(b => {
                   const val = b === "5+" ? 5 : (b as number);
@@ -283,13 +349,13 @@ export default function MapFilterModal({ open, onClose, listingTab, filters, onC
             onClick={reset}
             className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Đặt lại
+            {T.reset}
           </button>
           <button
             onClick={apply}
             className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
           >
-            Xác nhận
+            {T.apply}
           </button>
         </div>
       </div>
