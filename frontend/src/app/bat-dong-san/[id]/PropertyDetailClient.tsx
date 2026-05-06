@@ -14,6 +14,60 @@ import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/auth";
 
+const DETAIL_T = {
+  vi: {
+    home: "Trang chủ", properties: "Bất động sản",
+    save: "Lưu tin", unsave: "Bỏ lưu", share: "Chia sẻ",
+    info: "Thông tin bất động sản",
+    area: "Diện tích", bedrooms: "Phòng ngủ", bathrooms: "Phòng tắm",
+    floor: "Tầng", floorVal: "Tầng", direction: "Hướng", legal: "Pháp lý",
+    roomsSuffix: "phòng",
+    description: "Mô tả chi tiết", address: "Địa chỉ",
+    addressLabel: "Địa chỉ:", district: "Quận/Huyện:", cityLabel: "Tỉnh/TP:", gps: "GPS:",
+    viewOnMap: "Xem trên bản đồ",
+    online: "Đang online", chatZalo: "Chat Zalo",
+    inquiry: "Yêu cầu xem nhà",
+    inquiryPlaceholder: "Nhắn tin cho chủ nhà: Tôi muốn xem nhà vào...",
+    sendZalo: "Gửi qua Zalo",
+    views: "lượt xem", postedOn: "Đăng ngày", verified: "Đã xác minh thông tin",
+    pricePerM2Suffix: "tr/m²",
+  },
+  en: {
+    home: "Home", properties: "Properties",
+    save: "Save", unsave: "Unsave", share: "Share",
+    info: "Property information",
+    area: "Area", bedrooms: "Bedrooms", bathrooms: "Bathrooms",
+    floor: "Floor", floorVal: "Floor", direction: "Direction", legal: "Legal status",
+    roomsSuffix: "rooms",
+    description: "Description", address: "Address",
+    addressLabel: "Address:", district: "District:", cityLabel: "Province/City:", gps: "GPS:",
+    viewOnMap: "View on map",
+    online: "Online", chatZalo: "Chat on Zalo",
+    inquiry: "Schedule a viewing",
+    inquiryPlaceholder: "Message the owner: I'd like to view the property on...",
+    sendZalo: "Send via Zalo",
+    views: "views", postedOn: "Posted on", verified: "Information verified",
+    pricePerM2Suffix: "M VND/m²",
+  },
+  zh: {
+    home: "首页", properties: "房产",
+    save: "收藏", unsave: "取消收藏", share: "分享",
+    info: "房产信息",
+    area: "面积", bedrooms: "卧室", bathrooms: "卫浴",
+    floor: "楼层", floorVal: "第", direction: "朝向", legal: "法律状态",
+    roomsSuffix: "间",
+    description: "描述", address: "地址",
+    addressLabel: "地址：", district: "区/县：", cityLabel: "省/市：", gps: "GPS：",
+    viewOnMap: "在地图上查看",
+    online: "在线", chatZalo: "Zalo 聊天",
+    inquiry: "预约看房",
+    inquiryPlaceholder: "给房东留言：我想在...看房",
+    sendZalo: "通过 Zalo 发送",
+    views: "浏览", postedOn: "发布于", verified: "信息已验证",
+    pricePerM2Suffix: "百万越南盾/平方米",
+  },
+} as const;
+
 export default function PropertyDetailClient({
   property,
   similar,
@@ -23,6 +77,7 @@ export default function PropertyDetailClient({
 }) {
   const { locale } = useLocale();
   const t = getT(locale);
+  const L = DETAIL_T[locale];
   const { user } = useUser();
   const [imgIdx, setImgIdx] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -80,9 +135,9 @@ export default function PropertyDetailClient({
     <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-4 flex items-center gap-2">
-        <Link href="/" className="hover:text-red-600">Trang chủ</Link>
+        <Link href="/" className="hover:text-red-600">{L.home}</Link>
         <span>/</span>
-        <Link href="/bat-dong-san" className="hover:text-red-600">Bất động sản</Link>
+        <Link href="/bat-dong-san" className="hover:text-red-600">{L.properties}</Link>
         <span>/</span>
         <span className="text-gray-800 truncate max-w-xs">{property.title}</span>
       </nav>
@@ -157,14 +212,14 @@ export default function PropertyDetailClient({
                   onClick={toggleSave}
                   disabled={savingToggle}
                   className={`p-2 rounded-lg border transition-colors disabled:opacity-50 ${saved ? "bg-red-50 border-red-300 text-red-600" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
-                  title={saved ? "Bỏ lưu" : "Lưu tin"}
+                  title={saved ? L.unsave : L.save}
                 >
                   <Heart className={`w-5 h-5 ${saved ? "fill-red-500" : ""}`} />
                 </button>
                 <button
                   onClick={handleShare}
                   className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50"
-                  title="Chia sẻ"
+                  title={L.share}
                 >
                   <Share2 className="w-5 h-5" />
                 </button>
@@ -179,7 +234,7 @@ export default function PropertyDetailClient({
                 <span className="text-3xl font-black text-red-600">{formatPrice(property.price, property.priceUnit)}</span>
                 {property.area > 0 && (
                   <span className="text-gray-500 text-sm ml-2">
-                    · {(property.price / property.area).toFixed(0)} tr/m²
+                    · {(property.price / property.area).toFixed(0)} {L.pricePerM2Suffix}
                   </span>
                 )}
               </div>
@@ -188,15 +243,15 @@ export default function PropertyDetailClient({
 
           {/* Key info */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="font-bold text-gray-800 mb-4">Thông tin bất động sản</h2>
+            <h2 className="font-bold text-gray-800 mb-4">{L.info}</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                { icon: <Maximize2 className="w-4 h-4" />, label: "Diện tích", value: `${property.area} m²` },
-                property.bedrooms ? { icon: <BedDouble className="w-4 h-4" />, label: "Phòng ngủ", value: `${property.bedrooms} phòng` } : null,
-                property.bathrooms ? { icon: <Bath className="w-4 h-4" />, label: "Phòng tắm", value: `${property.bathrooms} phòng` } : null,
-                property.floor ? { icon: <Home className="w-4 h-4" />, label: "Tầng", value: `Tầng ${property.floor}` } : null,
-                property.direction ? { icon: <Compass className="w-4 h-4" />, label: "Hướng", value: property.direction } : null,
-                property.legalStatus ? { icon: <FileText className="w-4 h-4" />, label: "Pháp lý", value: property.legalStatus } : null,
+                { icon: <Maximize2 className="w-4 h-4" />, label: L.area, value: `${property.area} m²` },
+                property.bedrooms ? { icon: <BedDouble className="w-4 h-4" />, label: L.bedrooms, value: `${property.bedrooms} ${L.roomsSuffix}` } : null,
+                property.bathrooms ? { icon: <Bath className="w-4 h-4" />, label: L.bathrooms, value: `${property.bathrooms} ${L.roomsSuffix}` } : null,
+                property.floor ? { icon: <Home className="w-4 h-4" />, label: L.floor, value: `${L.floorVal} ${property.floor}` } : null,
+                property.direction ? { icon: <Compass className="w-4 h-4" />, label: L.direction, value: property.direction } : null,
+                property.legalStatus ? { icon: <FileText className="w-4 h-4" />, label: L.legal, value: property.legalStatus } : null,
               ].filter(Boolean).map((item: any) => (
                 <div key={item.label} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="text-red-500">{item.icon}</div>
@@ -211,22 +266,22 @@ export default function PropertyDetailClient({
 
           {/* Description */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="font-bold text-gray-800 mb-3">Mô tả chi tiết</h2>
+            <h2 className="font-bold text-gray-800 mb-3">{L.description}</h2>
             <p className="text-gray-700 leading-relaxed text-sm">{property.description}</p>
           </div>
 
           {/* Address */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-red-500" /> Địa chỉ
+              <MapPin className="w-4 h-4 text-red-500" /> {L.address}
             </h2>
             <div className="text-sm text-gray-700 space-y-2">
               <div className="grid grid-cols-2 gap-2">
-                <div><span className="text-gray-500">Địa chỉ:</span> <span className="font-medium">{property.address}</span></div>
-                <div><span className="text-gray-500">Quận/Huyện:</span> <span className="font-medium">{property.district}</span></div>
-                <div><span className="text-gray-500">Tỉnh/TP:</span> <span className="font-medium">{property.city}</span></div>
+                <div><span className="text-gray-500">{L.addressLabel}</span> <span className="font-medium">{property.address}</span></div>
+                <div><span className="text-gray-500">{L.district}</span> <span className="font-medium">{property.district}</span></div>
+                <div><span className="text-gray-500">{L.cityLabel}</span> <span className="font-medium">{property.city}</span></div>
                 {property.lat && property.lng && (
-                  <div><span className="text-gray-500">GPS:</span> <span className="font-mono text-xs">{property.lat.toFixed(4)}, {property.lng.toFixed(4)}</span></div>
+                  <div><span className="text-gray-500">{L.gps}</span> <span className="font-mono text-xs">{property.lat.toFixed(4)}, {property.lng.toFixed(4)}</span></div>
                 )}
               </div>
               {property.lat && property.lng && (
@@ -234,7 +289,7 @@ export default function PropertyDetailClient({
                   href={`/ban-do?lat=${property.lat}&lng=${property.lng}&id=${property.id}`}
                   className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
-                  🗺️ Xem trên bản đồ
+                  🗺️ {L.viewOnMap}
                 </Link>
               )}
             </div>
@@ -251,7 +306,7 @@ export default function PropertyDetailClient({
               <div>
                 <div className="font-semibold text-gray-800">{property.contactName}</div>
                 <div className="text-xs text-green-600 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full inline-block" /> Đang online
+                  <span className="w-2 h-2 bg-green-500 rounded-full inline-block" /> {L.online}
                 </div>
               </div>
             </div>
@@ -269,13 +324,13 @@ export default function PropertyDetailClient({
               className="w-full bg-[#0068FF] text-white font-bold py-3 rounded-xl hover:bg-[#0057d9] transition-colors flex items-center justify-center gap-2 mb-3"
             >
               <svg viewBox="0 0 48 48" className="w-5 h-5 fill-white"><path d="M24 4C12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20S35.046 4 24 4zm9.6 27.2c-.4.8-1.6 1.6-2.8 1.6-.4 0-.8 0-1.2-.4-2-1.2-4-2.8-5.6-4.8-1.6-2-2.8-4-3.6-6-.4-.8-.4-1.6 0-2.4.4-.8 1.2-1.2 2-1.2.4 0 .8.4.8.4l1.6 2.4c.4.4.4 1.2 0 1.6l-.8.8c.4.8.8 1.6 1.6 2.4.8.8 1.6 1.2 2.4 1.6l.8-.8c.4-.4 1.2-.4 1.6 0l2.4 1.6c.4.4.4.4.4.8.4.4 0 1.2-.4 2z"/></svg>
-              Chat Zalo
+              {L.chatZalo}
             </a>
             {/* Quick inquiry */}
             <div className="border-t border-gray-100 pt-4">
-              <p className="text-xs font-semibold text-gray-600 mb-2">📋 Yêu cầu xem nhà</p>
+              <p className="text-xs font-semibold text-gray-600 mb-2">📋 {L.inquiry}</p>
               <textarea
-                placeholder="Nhắn tin cho chủ nhà: Tôi muốn xem nhà vào..."
+                placeholder={L.inquiryPlaceholder}
                 rows={3}
                 className="w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-400 resize-none"
               />
@@ -285,22 +340,22 @@ export default function PropertyDetailClient({
                 rel="noopener noreferrer"
                 className="mt-2 w-full bg-gray-900 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
               >
-                Gửi qua Zalo
+                {L.sendZalo}
               </a>
             </div>
 
             <div className="text-xs text-gray-500 space-y-2 border-t border-gray-100 pt-3">
               <div className="flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5" />
-                <span>{property.views?.toLocaleString()} lượt xem</span>
+                <span>{property.views?.toLocaleString()} {L.views}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Đăng ngày {property.postedAt}</span>
+                <span>{L.postedOn} {property.postedAt}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-3.5 h-3.5 text-green-500" />
-                <span className="text-green-600">Đã xác minh thông tin</span>
+                <span className="text-green-600">{L.verified}</span>
               </div>
             </div>
           </div>
