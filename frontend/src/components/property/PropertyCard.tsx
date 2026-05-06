@@ -63,7 +63,7 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <div className="text-red-600 font-bold text-base">{formatPrice(property.price, property.priceUnit)}</div>
+              <div className="text-red-600 font-bold text-base">{formatPrice(property.price, property.priceUnit, locale)}</div>
               <div className="flex items-center gap-3 text-gray-400 text-xs mt-0.5">
                 {property.bedrooms && <span className="flex items-center gap-0.5"><BedDouble className="w-3 h-3" />{property.bedrooms}</span>}
                 {property.bathrooms && <span className="flex items-center gap-0.5"><Bath className="w-3 h-3" />{property.bathrooms}</span>}
@@ -127,7 +127,7 @@ export default function PropertyCard({ property, viewMode = "grid" }: Props) {
       <div className="p-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-red-600 font-bold text-lg leading-tight">
-            {formatPrice(property.price, property.priceUnit)}
+            {formatPrice(property.price, property.priceUnit, locale)}
           </span>
           <div className="text-right">
             <div className="text-gray-500 text-xs">{property.area} m²</div>

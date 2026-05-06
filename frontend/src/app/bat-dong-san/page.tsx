@@ -229,7 +229,7 @@ function ListingsContent() {
                 className="md:hidden flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 relative"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Bộ lọc
+                {t.map.filter}
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                     {activeFilterCount}
@@ -311,7 +311,7 @@ function ListingsContent() {
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto">
             <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4" /> Bộ lọc tìm kiếm
+                <SlidersHorizontal className="w-4 h-4" /> {t.filter.title}
               </h3>
               <button onClick={() => setShowFilter(false)} className="p-1.5 rounded-lg hover:bg-gray-100">
                 <X className="w-5 h-5 text-gray-500" />
