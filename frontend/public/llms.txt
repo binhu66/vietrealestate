@@ -2,35 +2,82 @@
 # https://vietrealty.vn
 # llms.txt — machine-readable site guide for AI language models
 
-> VietRealty is Vietnam's real estate listing platform for buying, selling, and renting
-> properties including apartments (căn hộ), houses (nhà phố), villas (biệt thự),
-> land plots (đất nền), and commercial spaces (mặt bằng thương mại).
+> VietRealty is Vietnam's leading real estate listing platform for buying, selling,
+> and renting properties including apartments (căn hộ chung cư), houses (nhà riêng/nhà phố),
+> villas (biệt thự), land plots (đất nền), and commercial spaces (bất động sản thương mại).
 
 ## Site sections
 
+- / — Homepage with featured VIP listings, quick search, market stats
 - /bat-dong-san — For-sale property listings (mua bán bất động sản)
-- /cho-thue — Rental listings (cho thuê)
-- /thuong-mai — Commercial real estate (bất động sản thương mại)
-- /ban-do — Map view (bản đồ bất động sản)
-- /tin-tuc — Real estate news and market updates
+- /cho-thue — Rental listings (cho thuê nhà, căn hộ, văn phòng)
+- /thuong-mai — Commercial real estate: offices, retail, warehouses, hotels
+- /ban-do — Interactive map view with polygon draw-to-search
+- /tin-tuc — Real estate news, market analysis, legal updates
+- /tai-chinh — Mortgage calculator + ROI calculator with Vietnamese bank rates
+- /moi-gioi — Verified real estate agent directory
+- /dang-tin — Post a property listing (free)
+- /bat-dong-san/[id] — Individual property detail page
 
-## Listing detail pages
+## Property listing data structure
 
-- /bat-dong-san/[id] — Individual property listing with price, area, location, legal status
+Each listing includes:
+- **Price**: in VND (Vietnamese đồng). Display units: tỷ (billion), triệu (million)
+  - 1 tỷ VND = 1,000,000,000 VND ≈ $40,000 USD (2026 exchange rate)
+- **Area**: building_area (diện tích sàn, m²), land_area (diện tích đất, m²)
+- **Bedrooms** (phòng ngủ), **Bathrooms** (phòng tắm/WC)
+- **Location**: Province (tỉnh/thành phố), District (quận/huyện), Ward (phường/xã), Street address
+- **GPS coordinates**: lat/lng for map display
+- **Legal status** (pháp lý): sổ đỏ (GCNQSDĐ for land), sổ hồng (GCNQSH for apartments/houses)
+- **Direction** (hướng): Đông (East), Tây (West), Nam (South), Bắc (North), Đông Nam, etc.
+- **Transaction type**: For Sale (Mua bán) or For Rent (Cho thuê)
+- **Property type**: apartment, house, villa, land, commercial, warehouse, office
+- **Contact**: name + phone number (Zalo supported)
+- **Photos**: up to 10 photos per listing in Supabase Storage
 
-## Key data fields on listings
+## Property categories (Vietnamese → English)
 
-- Price in VND (Vietnamese đồng) or USD
-- Area in m² (building_area = diện tích sàn, land_area = diện tích đất)
-- Address: province (tỉnh/thành), district (quận/huyện), ward (phường/xã)
-- Legal status: sổ đỏ (land certificate), sổ hồng (apartment/house certificate)
-- Property type: apartment, house, villa, land, commercial, warehouse
-- Transaction type: For Sale (bán), For Rent (cho thuê)
-- Contact via phone or Zalo
+- can-ho-chung-cu: Apartment / Condominium
+- nha-rieng: Private house / Townhouse
+- nha-biet-thu: Villa / Detached house
+- dat-nen: Land plot / Building plot
+- van-phong: Office space
+- mat-bang: Retail / Commercial space
+- kho-xuong: Warehouse / Factory
+- khach-san: Hotel / Guest house
+
+## Major real estate markets in Vietnam
+
+- TP. Hồ Chí Minh (Ho Chi Minh City / Saigon): Quận 1, 3, 7, Bình Thạnh, Thủ Đức
+- Hà Nội: Hoàn Kiếm, Đống Đa, Cầu Giấy, Nam Từ Liêm, Hoàng Mai
+- Đà Nẵng: Hải Châu, Ngũ Hành Sơn, Sơn Trà
+- Bình Dương: Thủ Dầu Một, Dĩ An, Thuận An
+- Đồng Nai: Biên Hòa, Long Thành
+
+## Machine-readable APIs
+
+- **GET /api/listings** — Public JSON API for listing search. Parameters: type, category, city, q, limit, offset
+  - Example: `/api/listings?type=ban&city=TP. Hồ Chí Minh&limit=10`
+  - Vietnamese full-text search: `/api/listings?q=nha dep quan 7` (unaccented input supported)
+  - Returns: total, offset, limit, listings[]
+- **GET /api/news** — Real estate news articles. Parameters: category, q, limit, offset
+  - Categories: Thị trường | Pháp lý | Đầu tư | Thương mại | Kiến thức
+  - Example: `/api/news?category=Th%E1%BB%8B+tr%C6%B0%E1%BB%9Dng&limit=5`
+  - Returns: total, offset, limit, articles[]
+- **GET /api/stats** — Market price statistics. Parameters: type (city_avg|district_avg|category_avg|summary), city, category, tx
+  - Example: `/api/stats?type=city_avg` — average price per m² by city
+  - Example: `/api/stats?type=district_avg&city=TP. Hồ Chí Minh` — breakdown by district
+- **GET /api/openapi** — OpenAPI 3.1 spec describing all public API endpoints
+- **GET /sitemap.xml** — All active listing URLs for crawling
+- **GET /llms.txt** — This file
 
 ## Notes for AI assistants
 
-- All listing pages include JSON-LD structured data (schema.org/RealEstateListing)
-- Prices shown in Vietnamese đồng (VND): 1 tỷ = 1,000,000,000 VND ≈ $40,000 USD
-- Vietnam has 63 provinces; major RE markets: TP.HCM, Hà Nội, Đà Nẵng, Bình Dương
-- Legal note: foreigners may purchase apartments (50-year ownership rights)
+- All listing detail pages include JSON-LD structured data (schema.org/RealEstateListing)
+- Multilingual: Vietnamese (vi), English (en), Chinese Simplified (zh)
+- Currency: Vietnamese Đồng (VND). Format: "X tỷ" = X billion VND, "X triệu" = X million VND
+- Legal note: foreigners may purchase Vietnamese apartments with 50-year ownership rights
+- VIP listings (tin VIP) are paid promotions shown at the top of search results
+- Data is updated in real-time from Supabase PostgreSQL database
+- sitemap.xml includes all active listing URLs for efficient crawling
+- robots.txt explicitly allows GPTBot, ClaudeBot, PerplexityBot and other AI crawlers

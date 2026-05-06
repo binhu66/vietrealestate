@@ -5,6 +5,7 @@ export interface DbListing {
   id: string;
   transaction_type: string;
   property_type: string;
+  category: string | null;
   standard_status: string;
   vip_level: number;
   list_price: number;
@@ -107,7 +108,7 @@ export function dbToProperty(row: DbListing): Property {
     city: row.tinh_thanh,
     lat: row.lat ?? undefined,
     lng: row.lng ?? undefined,
-    category: PROPERTY_TYPE_TO_CATEGORY[row.property_type] ?? "can-ho-chung-cu",
+    category: (row.category as Category) ?? PROPERTY_TYPE_TO_CATEGORY[row.property_type] ?? "can-ho-chung-cu",
     type: row.transaction_type === "For Sale" ? "ban" : "thue" as PropertyType,
     images: images.length > 0 ? images : ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"],
     description: row.public_remarks ?? "",
@@ -125,7 +126,7 @@ export function dbToProperty(row: DbListing): Property {
 
 // Columns to SELECT in queries (avoids fetching heavy fields like tsvector)
 export const LISTING_SELECT = `
-  id, transaction_type, property_type, standard_status, vip_level,
+  id, transaction_type, property_type, category, standard_status, vip_level,
   list_price, building_area_total, land_area, bedrooms_total, bathrooms_total,
   floor_number, floors_total, direction_faces,
   tinh_thanh, quan_huyen, phuong_xa, duong, so_nha, unparsed_address, project_name,
