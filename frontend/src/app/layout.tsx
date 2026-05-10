@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import AgentWidget from "@/components/AgentWidget";
 import BottomNav from "@/components/layout/BottomNav";
 import { SavedProvider } from "@/lib/savedContext";
+import SiteJsonLd from "@/components/seo/SiteJsonLd";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://binhorizon.com";
 
@@ -38,9 +39,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: BASE_URL,
     languages: {
-      "vi": `${BASE_URL}`,
-      "en": `${BASE_URL}`,
-      "zh": `${BASE_URL}`,
+      "vi-VN": BASE_URL,
+      "en":    `${BASE_URL}/?lang=en`,
+      "zh-CN": `${BASE_URL}/?lang=zh`,
+      "x-default": BASE_URL,
     },
   },
 };
@@ -48,6 +50,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" className="h-full">
+      <head>
+        <SiteJsonLd />
+      </head>
       <body className="min-h-full flex flex-col bg-gray-50">
         <LocaleProvider>
           <SavedProvider>

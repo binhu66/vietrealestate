@@ -141,11 +141,26 @@ export default async function PropertyDetailPage(
     },
   };
 
+  // BreadcrumbList: helps Google show the navigation path in search results
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "BinHorizon", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "Bất động sản", item: `${BASE_URL}/bat-dong-san` },
+      { "@type": "ListItem", position: 3, name: property.title, item: `${BASE_URL}/bat-dong-san/${property.id}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <PropertyDetailClient property={property} similar={similar} />
     </>
