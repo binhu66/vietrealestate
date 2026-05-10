@@ -1,0 +1,15 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "BinHorizon Vietnam Real Estate",
+  "name_for_model": "binhorizon",
+  "description_for_human": "Search Vietnam real estate listings — apartments, houses, villas, land plots, commercial properties for sale or rent across Ho Chi Minh City, Hanoi, Da Nang and other Vietnamese cities.",
+  "description_for_model": "Plugin for searching and reading real estate listings in Vietnam from BinHorizon, the country's leading marketplace. Supports filtering by transaction type (for sale / for rent), property category (apartment, house, villa, land, office, retail, warehouse, hotel), city, and Vietnamese full-text search (unaccented input also works). Returns prices in VND (1 tỷ = 1 billion VND ≈ $40,000 USD), areas in m², and full address with GPS coordinates. Use /api/listings for search and /api/listings/{id}.md for clean Markdown view of a single listing. /api/news returns market news, /api/stats gives aggregate price statistics. All endpoints are free, no auth required.",
+  "auth": { "type": "none" },
+  "api": {
+    "type": "openapi",
+    "url": "https://binhorizon.com/api/openapi"
+  },
+  "logo_url": "https://binhorizon.com/icon.png",
+  "contact_email": "api@binhorizon.com",
+  "legal_info_url": "https://binhorizon.com/dieu-khoan"
+}

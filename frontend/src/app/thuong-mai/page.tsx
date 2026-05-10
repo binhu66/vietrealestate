@@ -8,7 +8,7 @@ import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
 import { dbToProperty, LISTING_SELECT, type DbListing } from "@/lib/listingAdapter";
-import { Loader2 } from "lucide-react";
+import { Loader2, LayoutGrid, List } from "lucide-react";
 
 const COMMERCIAL_CATEGORIES = ["van-phong", "mat-bang", "kho-xuong", "khach-san"];
 
@@ -26,8 +26,9 @@ export default function ThuongMaiPage() {
   const [listings, setListings] = useState<Property[]>(
     properties.filter(p => COMMERCIAL_CATEGORIES.includes(p.category))
   );
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading]     = useState(true);
   const [activeTab, setActiveTab] = useState("");
+  const [viewMode, setViewMode]   = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     async function fetch() {
@@ -65,9 +66,21 @@ export default function ThuongMaiPage() {
       <div className="mb-6">
         <SearchBar />
       </div>
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">🏢 {t.nav.thuongMai}</h1>
-        <p className="text-gray-500 mt-1">Văn phòng, mặt bằng, kho xưởng, khách sạn</p>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">🏢 {t.nav.thuongMai}</h1>
+          <p className="text-gray-500 mt-1">
+            {loading ? <><Loader2 className="w-3 h-3 animate-spin inline mr-1" />Đang tải...</> : <><strong className="text-gray-800">{filtered.length}</strong> · Văn phòng, mặt bằng, kho xưởng, khách sạn</>}
+          </p>
+        </div>
+        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <button onClick={() => setViewMode("grid")} className={`p-2 rounded-md transition-colors ${viewMode === "grid" ? "bg-amber-600 text-white" : "text-gray-600 hover:bg-gray-200"}`} title="Dạng lưới">
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button onClick={() => setViewMode("list")} className={`p-2 rounded-md transition-colors ${viewMode === "list" ? "bg-amber-600 text-white" : "text-gray-600 hover:bg-gray-200"}`} title="Dạng danh sách">
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Sub-category tabs */}
@@ -99,8 +112,8 @@ export default function ThuongMaiPage() {
           <p>Chưa có bất động sản thương mại</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(p => <PropertyCard key={p.id} property={p} />)}
+        <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "space-y-3"}>
+          {filtered.map(p => <PropertyCard key={p.id} property={p} viewMode={viewMode} />)}
         </div>
       )}
     </div>

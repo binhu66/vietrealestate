@@ -58,7 +58,7 @@ function ListingsContent() {
       if (filters.type === "ban")  query = query.eq("transaction_type", "For Sale");
       if (filters.type === "thue") query = query.eq("transaction_type", "For Rent");
       if (filters.city) query = query.eq("tinh_thanh", filters.city);
-      if (q) query = query.or(`title.ilike.%${q}%,unparsed_address.ilike.%${q}%,quan_huyen.ilike.%${q}%`);
+      if (q) query = query.textSearch("search_vector", q, { type: "websearch", config: "simple" });
 
       const { data, error, count } = await query;
       if (!error && data) {
@@ -134,9 +134,9 @@ function ListingsContent() {
 
       {/* Type */}
       <div className="mb-4">
-        <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">Loại giao dịch</label>
+        <label className="text-xs font-semibold text-gray-500 uppercase mb-2 block">{t.salePage.txnType}</label>
         <div className="flex gap-2">
-          {[{ v: "", l: "Tất cả" }, { v: "ban", l: "Bán" }, { v: "thue", l: "Thuê" }].map(opt => (
+          {[{ v: "", l: t.salePage.txnAll }, { v: "ban", l: t.salePage.txnSale }, { v: "thue", l: t.salePage.txnRent }].map(opt => (
             <button key={opt.v} onClick={() => updateFilter("type", opt.v)}
               className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${filters.type === opt.v ? "bg-red-600 text-white border-red-600" : "border-gray-200 text-gray-600 hover:border-red-400"}`}
             >{opt.l}</button>
@@ -150,7 +150,7 @@ function ListingsContent() {
         <select value={filters.city} onChange={e => updateFilter("city", e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
         >
-          <option value="">Tất cả tỉnh/thành</option>
+          <option value="">{t.salePage.allCities}</option>
           {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
@@ -161,7 +161,7 @@ function ListingsContent() {
         <div className="space-y-1">
           <button onClick={() => updateFilter("category", "")}
             className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${!filters.category ? "bg-red-50 text-red-600 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
-          >Tất cả loại</button>
+          >{t.salePage.allCategories}</button>
           {categories.map(cat => (
             <button key={cat.id} onClick={() => updateFilter("category", cat.id)}
               className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center gap-2 ${filters.category === cat.id ? "bg-red-50 text-red-600 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
@@ -229,7 +229,7 @@ function ListingsContent() {
                 className="md:hidden flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 relative"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                Bộ lọc
+                {t.map.filter}
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                     {activeFilterCount}
@@ -238,7 +238,7 @@ function ListingsContent() {
               </button>
               <span className="text-sm text-gray-600 flex items-center gap-1">
                 {loading && <Loader2 className="w-3 h-3 animate-spin" />}
-                <strong className="text-gray-900">{totalCount !== null ? totalCount.toLocaleString() : filtered.length}</strong> tin đăng
+                <strong className="text-gray-900">{totalCount !== null ? totalCount.toLocaleString() : filtered.length}</strong> {t.salePage.listings}
                 {q && <span> · &ldquo;<em>{q}</em>&rdquo;</span>}
                 {fromSupabase && <span className="text-xs text-green-600 ml-1">● live</span>}
               </span>
@@ -247,10 +247,10 @@ function ListingsContent() {
               <select value={sortBy} onChange={e => setSortBy(e.target.value)}
                 className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
               >
-                <option value="newest">Mới nhất</option>
-                <option value="price_asc">Giá tăng dần</option>
-                <option value="price_desc">Giá giảm dần</option>
-                <option value="area_desc">Diện tích lớn nhất</option>
+                <option value="newest">{t.map.sortNewest}</option>
+                <option value="price_asc">{t.map.sortPriceAsc}</option>
+                <option value="price_desc">{t.map.sortPriceDesc}</option>
+                <option value="area_desc">{locale === "zh" ? "面积最大" : locale === "en" ? "Largest area" : "Diện tích lớn nhất"}</option>
               </select>
               <div className="flex border border-gray-200 rounded-lg overflow-hidden">
                 <button onClick={() => setViewMode("grid")}
@@ -267,18 +267,18 @@ function ListingsContent() {
           {loading ? (
             <div className="flex items-center justify-center py-16 text-gray-400">
               <Loader2 className="w-8 h-8 animate-spin mr-3" />
-              <span>Đang tải danh sách...</span>
+              <span>{t.salePage.loading}</span>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <div className="text-5xl mb-4">🏚️</div>
-              <p className="font-medium">Không tìm thấy bất động sản phù hợp</p>
-              <p className="text-sm mt-1">Hãy thử thay đổi bộ lọc</p>
+              <p className="font-medium">{t.salePage.noResults}</p>
+              <p className="text-sm mt-1">{locale === "zh" ? "请尝试更改筛选条件" : locale === "en" ? "Try adjusting filters" : "Hãy thử thay đổi bộ lọc"}</p>
             </div>
           ) : (
             <>
               <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" : "space-y-4"}>
-                {filtered.map(p => <PropertyCard key={p.id} property={p} />)}
+                {filtered.map(p => <PropertyCard key={p.id} property={p} viewMode={viewMode} />)}
               </div>
 
               {/* Load more */}
@@ -290,7 +290,7 @@ function ListingsContent() {
                     className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-60 shadow-sm"
                   >
                     {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
-                    {loadingMore ? "Đang tải..." : "Xem thêm tin đăng"}
+                    {loadingMore ? t.salePage.loadingMore : t.salePage.loadMore}
                   </button>
                   {totalCount && (
                     <p className="text-xs text-gray-400 mt-2">
@@ -311,7 +311,7 @@ function ListingsContent() {
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto">
             <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4" /> Bộ lọc tìm kiếm
+                <SlidersHorizontal className="w-4 h-4" /> {t.filter.title}
               </h3>
               <button onClick={() => setShowFilter(false)} className="p-1.5 rounded-lg hover:bg-gray-100">
                 <X className="w-5 h-5 text-gray-500" />

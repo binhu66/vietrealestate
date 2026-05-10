@@ -15,19 +15,26 @@ export default function LocaleProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const stored = localStorage.getItem("vr_locale") as Locale | null;
+    let next: Locale;
     if (stored === "vi" || stored === "en" || stored === "zh") {
-      setLocaleState(stored);
+      next = stored;
     } else {
-      // First visit: admin defaults to en, frontend to vi
-      const defaultLocale: Locale = pathname?.startsWith("/admin") ? "en" : "vi";
-      setLocaleState(defaultLocale);
-      localStorage.setItem("vr_locale", defaultLocale);
+      next = pathname?.startsWith("/admin") ? "en" : "vi";
+      localStorage.setItem("vr_locale", next);
+    }
+    setLocaleState(next);
+    // Keep <html lang> in sync for SEO (Google reads this signal)
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = next;
     }
   }, []);
 
   function setLocale(l: Locale) {
     setLocaleState(l);
     localStorage.setItem("vr_locale", l);
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = l;
+    }
   }
 
   return (

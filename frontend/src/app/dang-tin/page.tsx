@@ -300,7 +300,7 @@ export default function DangTinPage() {
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">🔐</div>
           <h2 className="text-xl font-black text-gray-900 mb-2">Đăng nhập để đăng tin</h2>
-          <p className="text-gray-500 text-sm mb-6">Bạn cần có tài khoản để đăng bất động sản lên VietRealty.</p>
+          <p className="text-gray-500 text-sm mb-6">Bạn cần có tài khoản để đăng bất động sản lên BinHorizon.</p>
           <div className="flex gap-3 justify-center">
             <Link href="/dang-nhap?redirect=/dang-tin" className="flex items-center gap-2 bg-red-600 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-red-700 transition-colors">
               <LogIn className="w-4 h-4" /> Đăng nhập

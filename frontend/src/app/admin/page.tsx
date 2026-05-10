@@ -5,8 +5,7 @@ import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useLocale } from "@/lib/locale";
 import { getT } from "@/i18n";
 import { supabase } from "@/lib/supabase";
-
-const ADMIN_EMAILS = ["condosmore66@gmail.com", "admin@vietrealestate.vn"];
+import { ADMIN_EMAILS } from "@/lib/config";
 
 export default function AdminLoginPage() {
   const { locale } = useLocale();
@@ -53,7 +52,7 @@ export default function AdminLoginPage() {
           <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-200">
             <span className="text-white font-black text-2xl">VR</span>
           </div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white">VietRealty Admin</h1>
+          <h1 className="text-2xl font-black text-gray-900 dark:text-white">BinHorizon Admin</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">{t.admin.login}</p>
         </div>
 

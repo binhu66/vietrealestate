@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Chính sách bảo mật | VietRealty",
-  description: "Chính sách bảo mật và quyền riêng tư của VietRealty – nền tảng bất động sản #1 Việt Nam",
+  title: "Chính sách bảo mật | BinHorizon",
+  description: "Chính sách bảo mật và quyền riêng tư của BinHorizon – nền tảng bất động sản #1 Việt Nam",
 };
 
 const LAST_UPDATED = "01/05/2026";
@@ -22,7 +22,7 @@ export default function ChinhSachBaoMatPage() {
         <section>
           <h2 className="text-lg font-bold text-gray-900 mb-3">1. Giới thiệu</h2>
           <p>
-            VietRealty (vietrealty.vn) cam kết bảo vệ quyền riêng tư của người dùng. Chính sách này mô tả cách chúng tôi
+            BinHorizon (binhorizon.com) cam kết bảo vệ quyền riêng tư của người dùng. Chính sách này mô tả cách chúng tôi
             thu thập, sử dụng và bảo vệ thông tin cá nhân khi bạn sử dụng nền tảng và ứng dụng di động của chúng tôi.
           </p>
         </section>
@@ -70,7 +70,7 @@ export default function ChinhSachBaoMatPage() {
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Truy cập:</strong> Xem dữ liệu cá nhân trong mục "Tài khoản"</li>
             <li><strong>Chỉnh sửa:</strong> Cập nhật thông tin hồ sơ bất kỳ lúc nào</li>
-            <li><strong>Xóa:</strong> Yêu cầu xóa tài khoản qua email info@vietrealty.vn</li>
+            <li><strong>Xóa:</strong> Yêu cầu xóa tài khoản qua email info@binhorizon.com</li>
             <li><strong>Từ chối:</strong> Tắt thông báo push trong cài đặt thiết bị</li>
             <li><strong>Vị trí:</strong> Từ chối cấp quyền vị trí mà vẫn dùng được ứng dụng</li>
           </ul>
@@ -113,7 +113,7 @@ export default function ChinhSachBaoMatPage() {
           <h2 className="text-lg font-bold text-gray-900 mb-3">10. Liên hệ</h2>
           <p>
             Mọi thắc mắc về quyền riêng tư, vui lòng liên hệ:<br />
-            📧 <a href="mailto:info@vietrealty.vn" className="text-red-600 hover:underline">info@vietrealty.vn</a><br />
+            📧 <a href="mailto:info@binhorizon.com" className="text-red-600 hover:underline">info@binhorizon.com</a><br />
             📞 Hotline: <a href="tel:18006834" className="text-red-600 hover:underline">1800 6834</a><br />
             Địa chỉ: TP. Hồ Chí Minh, Việt Nam
           </p>

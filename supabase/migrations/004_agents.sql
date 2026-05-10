@@ -1,4 +1,4 @@
--- VietRealty: agents and contact_requests
+-- BinHorizon: agents and contact_requests
 
 -- ── agents ────────────────────────────────────────────────
 create table agents (

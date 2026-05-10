@@ -1,4 +1,4 @@
--- VietRealty: AI-assisted listing ingestion and scrape queue
+-- BinHorizon: AI-assisted listing ingestion and scrape queue
 -- Supports: (1) admin manual AI-parse from URL/image/text
 --           (2) background crawler jobs
 

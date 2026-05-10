@@ -213,7 +213,7 @@ export default function DangNhapPage() {
             <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-black">VR</span>
             </div>
-            <span className="font-black text-red-600 text-2xl">VietRealty</span>
+            <span className="font-black text-red-600 text-2xl">BinHorizon</span>
           </Link>
           <p className="text-gray-500 mt-2 text-sm">Đăng nhập để đăng tin và quản lý bất động sản</p>
         </div>

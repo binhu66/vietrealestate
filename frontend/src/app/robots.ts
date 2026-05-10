@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vietrealty.vn";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://binhorizon.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         // Welcome all bots including AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.)
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/", "/_next/"],
+        disallow: ["/admin/", "/api/geocode", "/api/mapbox-token", "/_next/"],
       },
       // Explicitly allow major AI crawlers for AI-friendly indexing
       { userAgent: "GPTBot", allow: "/" },

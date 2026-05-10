@@ -1,0 +1,15 @@
+
+# Capacitor / native builds
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/.sourcery/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/release/
+android/local.properties
+android/.idea/
+android/keystore.properties
+*.keystore
+*.jks

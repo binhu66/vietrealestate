@@ -1,4 +1,4 @@
-# VietRealty – Supabase Migrations
+# BinHorizon – Supabase Migrations
 
 ## Run order
 

@@ -482,7 +482,7 @@ Don't rush. Take time to view at least **10–15 properties** before deciding. I
 
 不要急于决定。在做决定前至少查看**10-15套**房产。独立法律咨询始终是值得的投资。`,
     category: "Kiến thức", categoryEn: "Knowledge", categoryZh: "知识",
-    author: "VietRealty Team", date: "2026-04-05", readMin: 10,
+    author: "BinHorizon Team", date: "2026-04-05", readMin: 10,
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200",
     featured: false,
   },
