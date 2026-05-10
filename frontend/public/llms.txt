@@ -67,7 +67,9 @@ Each listing includes:
 - **GET /api/stats** — Market price statistics. Parameters: type (city_avg|district_avg|category_avg|summary), city, category, tx
   - Example: `/api/stats?type=city_avg` — average price per m² by city
   - Example: `/api/stats?type=district_avg&city=TP. Hồ Chí Minh` — breakdown by district
-- **GET /api/openapi** — OpenAPI 3.1 spec describing all public API endpoints
+- **GET /api/listings/md/{id}** — Single listing as clean Markdown (AI-optimized, ~80% fewer tokens than HTML)
+- **GET /api/openapi** — OpenAPI 3.1 spec describing all public API endpoints (with x-ai-hints)
+- **GET /.well-known/ai-plugin.json** — ChatGPT/Claude plugin manifest
 - **GET /sitemap.xml** — All active listing URLs for crawling
 - **GET /llms.txt** — This file
 
